@@ -9,36 +9,25 @@
 #import "AJKXcodeAdditions.h"
 
 
-@interface AJKXcodeAdditions () {
-	NSString *lastPathComponent;
-}
-
-@end
-
-
 
 @implementation AJKXcodeAdditions
 
 
 + (void)pluginDidLoad:(NSBundle *)plugin
 {
-	static id AJKXcodeAdditionsPlugin__ = nil;
+	static id __xcodeAdditionsPlugin = nil;
 	static dispatch_once_t createXcodeAdditionsPlugin;
 	dispatch_once(&createXcodeAdditionsPlugin, ^{
-		AJKXcodeAdditionsPlugin__ = [[self alloc] init];
+		__xcodeAdditionsPlugin = [[self alloc] init];
 	});
 }
 
 
 - (id)init
 {
-	self = [super init]
+	self = [super init];
 	
 	if(self) {
-		// Register for notifications
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:nil];
-		
-		
 		// Add menu bar items for the 'Show Project in Finder' and 'Open Project in Terminal' actions
 		NSMenuItem *fileMenuItem = [[NSApp mainMenu] itemWithTitle:@"File"];
 		NSInteger desiredMenuItemIndex = [[fileMenuItem submenu] indexOfItemWithTitle:@"Open with External Editor"];
@@ -64,36 +53,32 @@
 }
 
 
-#pragma mark - Menu Item Actions
+
+#pragma mark - Actions for Menu Items
 
 
 - (void)showProjectInFinder:(id)sender
 {
-	NSString *projectDirectory = [self projectDirectory] ? : lastProjectDirectory;
+	NSString *projectDirectory = [self projectDirectory];
 	
-	if([projectDirectory length]) {
-		[[NSWorkspace sharedWorkspace] selectFile:projectDirectory inFileViewerRootedAtPath:@""];
-		lastProjectDirectory = projectDirectory;
-	}
+	if([projectDirectory length])
+		[[NSWorkspace sharedWorkspace] openFile:projectDirectory];
 }
 
 
 - (void)openProjectInTerminal:(id)sender
 {
-	NSString *projectDirectory = [self projectDirectory] ? : lastProjectDirectory;
+	NSString *projectDirectory = [self projectDirectory];
 	
-	if([projectDirectory length]) {
+	if([projectDirectory length])
 		[[NSWorkspace sharedWorkspace] openFile:projectDirectory withApplication:@"Terminal"];
-		lastProjectDirectory = projectDirectory;
-	}
 }
 
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
 	if ([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
-		return [[[[NSApp keyWindow] windowController] window] isVisible]
-				&& (([lastProjectDirectory length] > 0) || ([[self projectDirectory] length] > 0));
+		return [[self projectDirectory] length] > 0;
 	}
 	
 	return YES;
@@ -101,29 +86,23 @@
 
 
 
-#pragma mark - Notifications
-
-
-- (void)windowDidBecomeKey:(NSNotification *)notification
-{
-	// Store the current projects directory so that it can be referenced while anciliary windows are front most
-	NSString *projectDirectory = [self projectDirectory];
-	
-	if([projectDirectory length])
-		lastProjectDirectory = projectDirectory;
-}
-
+#pragma mark - Actions for Menu Items
 
 
 - (NSString *)projectDirectory
 {
-	@try {
-		id workspace = [[[NSApp keyWindow] windowController] valueForKeyPath:@"_workspace"];
-		return [[workspace valueForKeyPath:@"representingFilePath.relativePathOnVolume"] stringByDeletingLastPathComponent];
-	}
-	
-	@catch (NSException *exception) {
-//		NSLog(@"AJKXcodeAdditions encountered an exception while asking for the current projects directory: %@", exception);
+	for (NSDocument *document in [NSApp orderedDocuments]) {
+		@try {
+			//	_workspace(IDEWorkspace) -> representingFilePath(DVTFilePath) -> relativePathOnVolume(NSString)
+			NSString *workspacePath = [document valueForKeyPath:@"_workspace.representingFilePath.relativePathOnVolume"];
+			
+			if([workspacePath length])
+				return [workspacePath stringByDeletingLastPathComponent];
+		}
+		
+		@catch (NSException *exception) {
+			NSLog(@"AJKXcodeAdditions. Raised an exception while asking for the documents '_workspace.representingFilePath.relativePathOnVolume' key path: %@", exception);
+		}
 	}
 	
 	return nil;
