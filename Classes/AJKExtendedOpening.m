@@ -1,19 +1,19 @@
 //
-//	AJKXcodeAdditions.m
+//	AJKExtendedOpening.m
 //	
 //	Created by Harry Jordan on 18/08/12.
 //	Released under the MIT license:	http://opensource.org/licenses/mit-license.php
 //
 
 
-#import "AJKXcodeAdditions.h"
+#import "AJKExtendedOpening.h"
 
 
 NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleIdentifier";
 
 
 
-@implementation AJKXcodeAdditions
+@implementation AJKExtendedOpening
 
 
 + (void)pluginDidLoad:(NSBundle *)plugin
@@ -62,7 +62,7 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 			[openInTerminalMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask];
 			[fileMenu insertItem:openInTerminalMenuItem atIndex:desiredMenuItemIndex];
 		} else
-			NSLog(@"AJKXcodeAdditions couldn't find an 'Open with External Editor' item in the File ment");
+			NSLog(@"AJKExtendedOpening Xcode plugin: Couldn't find an 'Open with External Editor' item in the File menu");
 	}
 
 	return self;
@@ -190,7 +190,7 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 	
 	
 	@catch (NSException *exception) {
-		NSLog(@"AJKXcodeAdditions. Raised an exception while asking for the documents 'recentEditorDocumentURLs' value: %@", exception);
+		NSLog(@"AJKExtendedOpening Xcode plugin: Raised an exception while asking for the documents 'recentEditorDocumentURLs' value: %@", exception);
 	}
 	
 	return nil;
@@ -209,7 +209,7 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 		}
 		
 		@catch (NSException *exception) {
-			NSLog(@"AJKXcodeAdditions. Raised an exception while asking for the documents '_workspace.representingFilePath.relativePathOnVolume' key path: %@", exception);
+			NSLog(@"AJKExtendedOpening Xcode plugin: Raised an exception while asking for the documents '_workspace.representingFilePath.relativePathOnVolume' key path: %@", exception);
 		}
 	}
 	
