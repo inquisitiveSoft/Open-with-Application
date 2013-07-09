@@ -29,7 +29,7 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 - (id)init
 {
 	self = [super init];
-	
+
 	if(self) {
 		// Add menu bar items for the 'Show Project in Finder' and 'Open Project in Terminal' actions
 		NSMenu *fileMenu = [[[NSApp mainMenu] itemWithTitle:@"File"] submenu];

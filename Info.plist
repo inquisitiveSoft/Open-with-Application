@@ -8,8 +8,6 @@
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.inquisitiveSoftware.${PRODUCT_NAME:identifier}</string>
-	<key>LSApplicationCategoryType</key>
-	<string></string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -20,13 +18,19 @@
 	<string>${CURRENT_PROJECT_VERSION}</string>
 	<key>CFBundleVersion</key>
 	<string>${CURRENT_PROJECT_VERSION}</string>
+	<key>DVTPlugInCompatibilityUUIDs</key>
+	<array>
+		<string>63FC1C47-140D-42B0-BB4D-A10B2D225574</string>
+	</array>
+	<key>LSApplicationCategoryType</key>
+	<string></string>
 	<key>NSPrincipalClass</key>
 	<string>AJKXcodeAdditions</string>
+	<key>XC4Compatible</key>
+	<true/>
 	<key>XCGCReady</key>
 	<true/>
 	<key>XCPluginHasUI</key>
 	<false/>
-	<key>XC4Compatible</key>
-	<true/>
 </dict>
 </plist>
