@@ -7,6 +7,7 @@
 
 
 #import "AJKExtendedOpening.h"
+#import <objc/runtime.h>
 
 
 NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleIdentifier";
@@ -166,31 +167,49 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 - (NSURL *)currentFileURL
 {
 	@try {
-		NSDocument *document = [[[NSApp keyWindow] windowController] document];
-		NSArray *recentEditorDocumentURLs = [document valueForKey:@"recentEditorDocumentURLs"];
+		NSWindowController *currentWindowController = [[NSApp keyWindow] windowController];
 		
-		if([recentEditorDocumentURLs count]) {
-			NSURL *recentEditorDocumentURL = [recentEditorDocumentURLs objectAtIndex:0];
+		if([currentWindowController isKindOfClass:NSClassFromString(@"IDEWorkspaceWindowController")]) {
+			id editor = [currentWindowController valueForKeyPath:@"editorArea.lastActiveEditorContext.editor"];
+			if(!editor)
+				return nil;
 			
-			// Test that the current document isn't
-			NSString *pathExtension = [recentEditorDocumentURL pathExtension];
-			NSArray *fileExtensionsToExclude = @[@"nib", @"xib", @"xcdatamodeld", @"jpeg", @"jpg", @"png", @"gif", @"pdf"];
+			id document = nil;;
 			
-			for (NSString *extensionToExclude in fileExtensionsToExclude) {
-				if([pathExtension isEqualToString:extensionToExclude]) {
-					pathExtension = nil;
-					break;
+			if([editor isKindOfClass:NSClassFromString(@"IDESourceCodeEditor")]) {
+				document = [editor valueForKey:@"sourceCodeDocument"];
+			} else if([editor isKindOfClass:NSClassFromString(@"IDESourceCodeComparisonEditor")]) {
+				id primaryDocument = [editor valueForKey:@"primaryDocument"];
+				
+				if([primaryDocument isKindOfClass:NSClassFromString(@"IDESourceCodeDocument")]) {
+					document = primaryDocument;
 				}
 			}
 			
-			if(pathExtension)
-				return recentEditorDocumentURL;
+			if(document) {
+				NSArray *knownFileReferences = [document valueForKey:@"knownFileReferences"];
+				
+				for(id fileReference in knownFileReferences) {
+					NSURL *url = [fileReference valueForKeyPath:@"resolvedFilePath.fileURL"];
+					NSString *pathExtension = [url pathExtension];
+					NSArray *fileExtensionsToExclude = @[@"nib", @"xib", @"xcdatamodeld", @"jpeg", @"jpg", @"png", @"gif", @"pdf"];
+					
+					for (NSString *extensionToExclude in fileExtensionsToExclude) {
+						if([pathExtension isEqualToString:extensionToExclude]) {
+							pathExtension = nil;
+							break;
+						}
+					}
+					
+					if(pathExtension)
+						return url;
+				}
+			}
 		}
 	}
 	
-	
 	@catch (NSException *exception) {
-		NSLog(@"AJKExtendedOpening Xcode plugin: Raised an exception while asking for the documents 'recentEditorDocumentURLs' value: %@", exception);
+		NSLog(@"AJKExtendedOpening Xcode plugin: Raised an exception while asking for the URL of the sourceCodeDocument: %@", exception);
 	}
 	
 	return nil;
