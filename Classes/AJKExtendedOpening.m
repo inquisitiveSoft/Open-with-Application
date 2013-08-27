@@ -62,8 +62,9 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 			[openInTerminalMenuItem setTarget:self];
 			[openInTerminalMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask];
 			[fileMenu insertItem:openInTerminalMenuItem atIndex:desiredMenuItemIndex];
-		} else
+		} else if([NSApp mainMenu]) {
 			NSLog(@"AJKExtendedOpening Xcode plugin: Couldn't find an 'Open with External Editor' item in the File menu");
+		}
 	}
 
 	return self;
@@ -184,32 +185,23 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 				if([primaryDocument isKindOfClass:NSClassFromString(@"IDESourceCodeDocument")]) {
 					document = primaryDocument;
 				}
+			} else if([editor isKindOfClass:NSClassFromString(@"IDEPlistEditor")]) {
+				// Could handle other types of document
+				// [self printAllMethodsForObject:editor];
 			}
 			
 			if(document) {
 				NSArray *knownFileReferences = [document valueForKey:@"knownFileReferences"];
 				
 				for(id fileReference in knownFileReferences) {
-					NSURL *url = [fileReference valueForKeyPath:@"resolvedFilePath.fileURL"];
-					NSString *pathExtension = [url pathExtension];
-					NSArray *fileExtensionsToExclude = @[@"nib", @"xib", @"xcdatamodeld", @"jpeg", @"jpg", @"png", @"gif", @"pdf"];
-					
-					for (NSString *extensionToExclude in fileExtensionsToExclude) {
-						if([pathExtension isEqualToString:extensionToExclude]) {
-							pathExtension = nil;
-							break;
-						}
-					}
-					
-					if(pathExtension)
-						return url;
+					return [fileReference valueForKeyPath:@"resolvedFilePath.fileURL"];
 				}
 			}
 		}
 	}
 	
 	@catch (NSException *exception) {
-		NSLog(@"AJKExtendedOpening Xcode plugin: Raised an exception while asking for the URL of the sourceCodeDocument: %@", exception);
+		NSLog(@"AJKExtendedOpening Xcode plugin: Raised an exception while looking for the URL of the sourceCodeDocument: %@", exception);
 	}
 	
 	return nil;
@@ -234,6 +226,25 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 	
 	return nil;
 }
+
+
+
+#pragma mark - A helper method to use in developing
+
+
+- (void)printAllMethodsForObject:(id)objectToInspect
+{
+	NSLog(@"%@", objectToInspect);
+	
+	int unsigned numberOfMethods;
+	Method *methods = class_copyMethodList([objectToInspect class], &numberOfMethods);
+	
+	for(int i = 0; i < numberOfMethods; i++) {
+		NSLog(@"%@: %@", NSStringFromClass([objectToInspect class]), NSStringFromSelector(method_getName(methods[i])));
+	}
+}
+
+
 
 
 @end
