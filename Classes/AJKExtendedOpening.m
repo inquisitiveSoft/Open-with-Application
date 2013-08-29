@@ -7,11 +7,13 @@
 
 
 #import "AJKExtendedOpening.h"
+
 #import <objc/runtime.h>
+#import <ScriptingBridge/ScriptingBridge.h>
 
 
 NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleIdentifier";
-
+NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBundleIdentifier";
 
 
 @implementation AJKExtendedOpening
@@ -45,11 +47,11 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 			[fileMenu insertItem:openWithExternalEditorMenuItem atIndex:desiredMenuItemIndex];
 			
 			desiredMenuItemIndex++;
-			NSMenuItem *setExternalEditorApplicationMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Set External Editor…" action:@selector(setExternalEditor:) keyEquivalent:@"E"] autorelease];
-			[setExternalEditorApplicationMenuItem setTarget:self];
-			[setExternalEditorApplicationMenuItem setAlternate:TRUE];
-			[setExternalEditorApplicationMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask | NSControlKeyMask];
-			[fileMenu insertItem:setExternalEditorApplicationMenuItem atIndex:desiredMenuItemIndex];
+			NSMenuItem *selectExternalEditorApplicationMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Set External Editor…" action:@selector(selectExternalEditor:) keyEquivalent:@"E"] autorelease];
+			[selectExternalEditorApplicationMenuItem setTarget:self];
+			[selectExternalEditorApplicationMenuItem setAlternate:TRUE];
+			[selectExternalEditorApplicationMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask | NSControlKeyMask];
+			[fileMenu insertItem:selectExternalEditorApplicationMenuItem atIndex:desiredMenuItemIndex];
 			
 			desiredMenuItemIndex++;
 			NSMenuItem *showProjectInFinderMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Show Project in Finder" action:@selector(showProjectInFinder:) keyEquivalent:@"R"] autorelease];
@@ -62,6 +64,13 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 			[openInTerminalMenuItem setTarget:self];
 			[openInTerminalMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask];
 			[fileMenu insertItem:openInTerminalMenuItem atIndex:desiredMenuItemIndex];
+			
+			desiredMenuItemIndex++;
+			NSMenuItem *selectTerminalMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Set Prefered Terminal" action:@selector(selectPreferedTerminal:) keyEquivalent:@"T"] autorelease];
+			[selectTerminalMenuItem setTarget:self];
+			[selectTerminalMenuItem setAlternate:TRUE];
+			[selectTerminalMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask | NSControlKeyMask];
+			[fileMenu insertItem:selectTerminalMenuItem atIndex:desiredMenuItemIndex];
 		} else if([NSApp mainMenu]) {
 			NSLog(@"AJKExtendedOpening Xcode plugin: Couldn't find an 'Open with External Editor' item in the File menu");
 		}
@@ -81,8 +90,9 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 	
 	if(currentFileURL) {
 		NSString *applicationIdentifier = [[NSUserDefaults standardUserDefaults] objectForKey:AJKExternalEditorBundleIdentifier];
-		if(!applicationIdentifier)
-			applicationIdentifier = [self requestExternalEditor];
+		if(!applicationIdentifier) {
+			applicationIdentifier = [self selectExternalEditor:nil];
+		}
 		
 		if([applicationIdentifier length]) {
 			[[NSWorkspace sharedWorkspace] openURLs:@[currentFileURL]
@@ -95,45 +105,17 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 }
 
 
-- (void)setExternalEditor:(id)sender
+- (NSString *)selectExternalEditor:(id)sender
 {
-	(void)[self requestExternalEditor];
-}
-
-
-- (NSString *)requestExternalEditor
-{
-	// Allow the user to choose which application they use as their external editor
-	NSURL *applicationsFolderURL = [NSURL URLWithString:@"/Applications"];
-	NSArray *applicationDirectoryURLs = [[NSFileManager defaultManager] URLsForDirectory:NSApplicationDirectory inDomains:NSLocalDomainMask];
-	if([applicationDirectoryURLs count])
-		applicationsFolderURL = [applicationDirectoryURLs objectAtIndex:0];
-	
-	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-	[openPanel setDirectoryURL:applicationsFolderURL];
-	[openPanel setAllowedFileTypes:@[@"app"]];
-	[openPanel setAllowsMultipleSelection:FALSE];
-	[openPanel setTitle:@"Select Your Prefered External Editor"];
-	
-	if([openPanel runModal] == NSOKButton) {
-		NSArray *applicationURLs = [openPanel URLs];
-		
-		if([applicationURLs count]) {
-			NSURL *applicationURL = [applicationURLs objectAtIndex:0];
-			NSString *applicationIdentifier = [[NSBundle bundleWithURL:applicationURL] bundleIdentifier];
-			
-			[[NSUserDefaults standardUserDefaults] setObject:applicationIdentifier forKey:AJKExternalEditorBundleIdentifier];
-			return applicationIdentifier;
-		}
-	}
-
-	return nil;
+	NSString *applicationIdentifier = [self requestApplicationIdentifierForTitle:@"Select Your Prefered External Editor"];
+	[[NSUserDefaults standardUserDefaults] setObject:applicationIdentifier forKey:AJKExternalEditorBundleIdentifier];
+	return applicationIdentifier;
 }
 
 
 - (void)showProjectInFinder:(id)sender
 {
-	NSString *projectDirectory = [self projectDirectory];
+	NSString *projectDirectory = [self projectDirectoryPath];
 	
 	if([projectDirectory length])
 		[[NSWorkspace sharedWorkspace] openFile:projectDirectory];
@@ -142,10 +124,49 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 
 - (void)openProjectInTerminal:(id)sender
 {
-	NSString *projectDirectory = [self projectDirectory];
+	NSString *projectDirectory = [self projectDirectoryPath];
 	
-	if([projectDirectory length])
-		[[NSWorkspace sharedWorkspace] openFile:projectDirectory withApplication:@"Terminal"];
+	if([projectDirectory length]) {
+		NSString *applicationIdentifier = [[NSUserDefaults standardUserDefaults] objectForKey:AJKPreferedTerminalBundleIdentifier];
+		
+		if(!applicationIdentifier || [applicationIdentifier isEqualToString:@"Terminal"]) {
+			[[NSWorkspace sharedWorkspace] openFile:projectDirectory withApplication:@"Terminal"];
+		} else if([applicationIdentifier isCaseInsensitiveLike:@"com.googlecode.iTerm2"]) {
+			// iTerm support is based on cdto: http://code.google.com/p/cdto/
+			@try {
+				projectDirectory = [projectDirectory stringByReplacingOccurrencesOfString:@"'" withString:@"\'"];
+				NSString *command = [NSString stringWithFormat:@"clear; pushd '%@'", projectDirectory];
+				
+				SBApplication *iTerm = [SBApplication applicationWithBundleIdentifier:@"com.googlecode.iTerm2"];
+//				BOOL shouldCreateNewTerminal = [iTerm isRunning];	// Seems to always return TRUE?
+				
+				[iTerm activate];
+				id currentTerminal = [iTerm valueForKey:@"currentTerminal"];
+				
+//				if(shouldCreateNewTerminal) {
+//					currentTerminal = [[[[iTerm classForScriptingClass:@"terminal"] alloc] init] autorelease];
+//					[[iTerm valueForKey:@"terminals"] addObject:currentTerminal];
+//					[currentTerminal performSelector:@selector(launchSession:) withObject:@"Default Session"];
+//				}
+				
+				id currentSession = [currentTerminal valueForKey:@"currentSession"];
+				[currentSession performSelector:@selector(writeContentsOfFile:text:) withObject:nil withObject:command];
+			}
+			
+			@catch (NSException *exception) {
+			}
+		} else {
+			NSLog(@"Unrecognized terminal emulator: %@", applicationIdentifier);
+		}
+	}
+}
+
+
+
+- (void)selectPreferedTerminal:(id)sender
+{
+	NSString *applicationIdentifier = [self requestApplicationIdentifierForTitle:@"Select Your Terminal Emulator of Choice"];
+	[[NSUserDefaults standardUserDefaults] setObject:applicationIdentifier forKey:AJKPreferedTerminalBundleIdentifier];
 }
 
 
@@ -154,7 +175,7 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 	if([menuItem action] == @selector(openWithExternalEditor:)) {
 		return [[self currentFileURL] isFileURL];
 	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
-		return [[self projectDirectory] length] > 0;
+		return [[self projectDirectoryPath] length] > 0;
 	}
 	
 	return YES;
@@ -163,6 +184,7 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 
 
 #pragma mark - Actions for Menu Items
+
 
 
 - (NSURL *)currentFileURL
@@ -208,15 +230,16 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 }
 
 
-- (NSString *)projectDirectory
+- (NSString *)projectDirectoryPath
 {
 	for (NSDocument *document in [NSApp orderedDocuments]) {
 		@try {
 			//	_workspace(IDEWorkspace) -> representingFilePath(DVTFilePath) -> relativePathOnVolume(NSString)
-			NSString *workspacePath = [document valueForKeyPath:@"_workspace.representingFilePath.relativePathOnVolume"];
+			NSURL *workspaceDirectoryURL = [[[document valueForKeyPath:@"_workspace.representingFilePath.fileURL"] URLByDeletingLastPathComponent] filePathURL];
 			
-			if([workspacePath length])
-				return [workspacePath stringByDeletingLastPathComponent];
+			if(workspaceDirectoryURL) {
+				return [workspaceDirectoryURL path];
+			}
 		}
 		
 		@catch (NSException *exception) {
@@ -226,6 +249,35 @@ NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleId
 	
 	return nil;
 }
+
+
+- (NSString *)requestApplicationIdentifierForTitle:(NSString *)title
+{
+	// Allow the user to choose which application they use as their external editor
+	NSURL *applicationsFolderURL = [NSURL URLWithString:@"/Applications"];
+	NSArray *applicationDirectoryURLs = [[NSFileManager defaultManager] URLsForDirectory:NSApplicationDirectory inDomains:NSLocalDomainMask];
+	if([applicationDirectoryURLs count])
+		applicationsFolderURL = [applicationDirectoryURLs objectAtIndex:0];
+	
+	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+	[openPanel setDirectoryURL:applicationsFolderURL];
+	[openPanel setAllowedFileTypes:@[@"app"]];
+	[openPanel setAllowsMultipleSelection:FALSE];
+	[openPanel setTitle:title];
+	
+	if([openPanel runModal] == NSOKButton) {
+		NSArray *applicationURLs = [openPanel URLs];
+		
+		if([applicationURLs count]) {
+			NSURL *applicationURL = [applicationURLs objectAtIndex:0];
+			NSString *applicationIdentifier = [[NSBundle bundleWithURL:applicationURL] bundleIdentifier];
+			return applicationIdentifier;
+		}
+	}
+
+	return nil;
+}
+
 
 
 

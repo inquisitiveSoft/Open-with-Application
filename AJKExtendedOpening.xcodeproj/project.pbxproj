@@ -10,6 +10,7 @@
 		4A56D6191608076A00AFA23C /* AJKExtendedOpening.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A4250641607FB5A00277699 /* AJKExtendedOpening.m */; };
 		4A56D61B1608076A00AFA23C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 089C1672FE841209C02AAC07 /* Foundation.framework */; };
 		4A56D61C1608076A00AFA23C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F2EB899145057EA00E97A87 /* AppKit.framework */; };
+		4A64921217CF8F0400DA967A /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A64921117CF8F0400DA967A /* ScriptingBridge.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -17,6 +18,7 @@
 		4A4250641607FB5A00277699 /* AJKExtendedOpening.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKExtendedOpening.m; sourceTree = "<group>"; };
 		4A4734DA160B382D00A14793 /* AJKExtendedOpening.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKExtendedOpening.h; sourceTree = "<group>"; };
 		4A56D61F1608076A00AFA23C /* AJKExtendedOpening.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AJKExtendedOpening.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A64921117CF8F0400DA967A /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = System/Library/Frameworks/ScriptingBridge.framework; sourceTree = SDKROOT; };
 		7F2EB899145057EA00E97A87 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -26,6 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A64921217CF8F0400DA967A /* ScriptingBridge.framework in Frameworks */,
 				4A56D61B1608076A00AFA23C /* Foundation.framework in Frameworks */,
 				4A56D61C1608076A00AFA23C /* AppKit.framework in Frameworks */,
 			);
@@ -50,6 +53,7 @@
 			children = (
 				7F2EB899145057EA00E97A87 /* AppKit.framework */,
 				089C1672FE841209C02AAC07 /* Foundation.framework */,
+				4A64921117CF8F0400DA967A /* ScriptingBridge.framework */,
 			);
 			name = "Frameworks and Libraries";
 			sourceTree = "<group>";
