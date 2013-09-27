@@ -129,7 +129,10 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 	if([projectDirectory length]) {
 		NSString *applicationIdentifier = [[NSUserDefaults standardUserDefaults] objectForKey:AJKPreferedTerminalBundleIdentifier];
 		
-		if(!applicationIdentifier || [applicationIdentifier isEqualToString:@"Terminal"]) {
+		if(!applicationIdentifier
+			|| [applicationIdentifier compare:@"com.apple.Terminal" options:NSCaseInsensitiveSearch] == NSOrderedSame
+			|| [applicationIdentifier compare:@"Terminal" options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+			//
 			[[NSWorkspace sharedWorkspace] openFile:projectDirectory withApplication:@"Terminal"];
 		} else if([applicationIdentifier isCaseInsensitiveLike:@"com.googlecode.iTerm2"]) {
 			// iTerm support is based on cdto: http://code.google.com/p/cdto/
@@ -156,7 +159,7 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 			@catch (NSException *exception) {
 			}
 		} else {
-			NSLog(@"Unrecognized terminal emulator: %@", applicationIdentifier);
+			NSLog(@"Unrecognized terminal emulator: '%@'", applicationIdentifier);
 		}
 	}
 }
