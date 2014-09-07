@@ -10,10 +10,25 @@
 
 #import <objc/runtime.h>
 #import <ScriptingBridge/ScriptingBridge.h>
+#import "AJKCreateShortcutWindowController.h"
 
 
 NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleIdentifier";
 NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBundleIdentifier";
+NSString * const AJKOpenWithApplications = @"AJKOpenWithApplications";
+
+NSString * const AJKApplicationIdentifier = @"AJKApplicationIdentifier";
+NSString * const AJKApplicationKeyEquivalent = @"AJKApplicationKeyEquivalent";
+NSString * const AJKApplicationKeyEquivalentModifierMask = @"AJKApplicationKeyEquivalentModifierMask";
+
+
+@interface AJKExtendedOpening ()
+
+@property (strong) NSMenuItem *openInApplicationMenuItem;
+
+@property (strong) AJKCreateShortcutWindowController *shortcutWindowController;
+
+@end
 
 
 @implementation AJKExtendedOpening
@@ -41,36 +56,48 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 		if(fileMenu && (desiredMenuItemIndex >= 0)) {
 			[fileMenu removeItemAtIndex:desiredMenuItemIndex];
 			
-			NSMenuItem *openWithExternalEditorMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Open with External Editor" action:@selector(openWithExternalEditor:) keyEquivalent:@"E"] autorelease];
+			NSMenuItem *openWithExternalEditorMenuItem = [[NSMenuItem alloc] initWithTitle:@"Open with External Editor" action:@selector(openWithExternalEditor:) keyEquivalent:@"E"];
 			[openWithExternalEditorMenuItem setTarget:self];
 			[openWithExternalEditorMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask];
 			[fileMenu insertItem:openWithExternalEditorMenuItem atIndex:desiredMenuItemIndex];
 			
 			desiredMenuItemIndex++;
-			NSMenuItem *selectExternalEditorApplicationMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Set External Editor…" action:@selector(selectExternalEditor:) keyEquivalent:@"E"] autorelease];
+			NSMenuItem *selectExternalEditorApplicationMenuItem = [[NSMenuItem alloc] initWithTitle:@"Set External Editor…" action:@selector(selectExternalEditor:) keyEquivalent:@"E"];
 			[selectExternalEditorApplicationMenuItem setTarget:self];
 			[selectExternalEditorApplicationMenuItem setAlternate:TRUE];
 			[selectExternalEditorApplicationMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask | NSControlKeyMask];
 			[fileMenu insertItem:selectExternalEditorApplicationMenuItem atIndex:desiredMenuItemIndex];
 			
 			desiredMenuItemIndex++;
-			NSMenuItem *showProjectInFinderMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Show Project in Finder" action:@selector(showProjectInFinder:) keyEquivalent:@"R"] autorelease];
+			NSMenuItem *showProjectInFinderMenuItem = [[NSMenuItem alloc] initWithTitle:@"Show Project in Finder" action:@selector(showProjectInFinder:) keyEquivalent:@"R"];
 			[showProjectInFinderMenuItem setTarget:self];
 			[showProjectInFinderMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask];
 			[fileMenu insertItem:showProjectInFinderMenuItem atIndex:desiredMenuItemIndex];
 			
 			desiredMenuItemIndex++;
-			NSMenuItem *openInTerminalMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Open Project in Terminal" action:@selector(openProjectInTerminal:) keyEquivalent:@"T"] autorelease];
+			NSMenuItem *openInTerminalMenuItem = [[NSMenuItem alloc] initWithTitle:@"Open Project in Terminal" action:@selector(openProjectInTerminal:) keyEquivalent:@"T"];
 			[openInTerminalMenuItem setTarget:self];
 			[openInTerminalMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask];
 			[fileMenu insertItem:openInTerminalMenuItem atIndex:desiredMenuItemIndex];
 			
 			desiredMenuItemIndex++;
-			NSMenuItem *selectTerminalMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Set Prefered Terminal" action:@selector(selectPreferedTerminal:) keyEquivalent:@"T"] autorelease];
+			NSMenuItem *selectTerminalMenuItem = [[NSMenuItem alloc] initWithTitle:@"Set Prefered Terminal" action:@selector(selectPreferedTerminal:) keyEquivalent:@"T"];
 			[selectTerminalMenuItem setTarget:self];
 			[selectTerminalMenuItem setAlternate:TRUE];
 			[selectTerminalMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask | NSControlKeyMask];
 			[fileMenu insertItem:selectTerminalMenuItem atIndex:desiredMenuItemIndex];
+			
+			desiredMenuItemIndex++;
+			NSMenuItem *separatorItem = [NSMenuItem separatorItem];
+			[fileMenu insertItem:separatorItem atIndex:desiredMenuItemIndex];
+			
+			desiredMenuItemIndex++;
+			NSMenuItem *openInApplicationMenuItem = [[NSMenuItem alloc] initWithTitle:@"Open In Application" action:nil keyEquivalent:@""];
+			[openInApplicationMenuItem setTarget:self];
+			[fileMenu insertItem:openInApplicationMenuItem atIndex:desiredMenuItemIndex];
+			self.openInApplicationMenuItem = openInApplicationMenuItem;
+			
+			[self updateOpenWithApplicationMenu];
 		} else if([NSApp mainMenu]) {
 			NSLog(@"AJKExtendedOpening Xcode plugin: Couldn't find an 'Open with External Editor' item in the File menu");
 		}
@@ -79,6 +106,21 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 	return self;
 }
 
+
+
+#pragma mark - Validating Menu Items
+
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem
+{
+	if([menuItem action] == @selector(openWithExternalEditor:)) {
+		return [[self currentFileURL] isFileURL];
+	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
+		return [[self projectDirectoryPath] length] > 0;
+	}
+	
+	return TRUE;
+}
 
 
 #pragma mark - Actions for Menu Items
@@ -141,16 +183,16 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 				NSString *command = [NSString stringWithFormat:@"clear; pushd '%@'", projectDirectory];
 				
 				SBApplication *iTerm = [SBApplication applicationWithBundleIdentifier:@"com.googlecode.iTerm2"];
-//				BOOL shouldCreateNewTerminal = [iTerm isRunning];	// Seems to always return TRUE?
+				BOOL shouldCreateNewTerminal = [iTerm isRunning];	// Seems to always return TRUE?
 				
 				[iTerm activate];
 				id currentTerminal = [iTerm valueForKey:@"currentTerminal"];
 				
-//				if(shouldCreateNewTerminal) {
-//					currentTerminal = [[[[iTerm classForScriptingClass:@"terminal"] alloc] init] autorelease];
-//					[[iTerm valueForKey:@"terminals"] addObject:currentTerminal];
-//					[currentTerminal performSelector:@selector(launchSession:) withObject:@"Default Session"];
-//				}
+				if(shouldCreateNewTerminal) {
+					currentTerminal = [[[iTerm classForScriptingClass:@"terminal"] alloc] init];
+					[[iTerm valueForKey:@"terminals"] addObject:currentTerminal];
+					[currentTerminal performSelector:@selector(launchSession:) withObject:@"Default Session"];
+				}
 				
 				id currentSession = [currentTerminal valueForKey:@"currentSession"];
 				[currentSession performSelector:@selector(writeContentsOfFile:text:) withObject:nil withObject:command];
@@ -165,7 +207,6 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 }
 
 
-
 - (void)selectPreferedTerminal:(id)sender
 {
 	NSString *applicationIdentifier = [self requestApplicationIdentifierForTitle:@"Select Your Terminal Emulator of Choice"];
@@ -173,21 +214,126 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 }
 
 
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem
+
+#pragma mark - The custom application menu
+
+
+ - (void)registerOpenWithApplication:(id)sender
 {
-	if([menuItem action] == @selector(openWithExternalEditor:)) {
-		return [[self currentFileURL] isFileURL];
-	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
-		return [[self projectDirectoryPath] length] > 0;
+	NSString *applicationIdentifier = [self requestApplicationIdentifierForTitle:@"Select an Application"];
+	
+	if(applicationIdentifier) {
+		AJKCreateShortcutWindowController *shortcutWindowController = [[AJKCreateShortcutWindowController alloc] init];
+		shortcutWindowController.applicationIdentifier = applicationIdentifier;
+		shortcutWindowController.applicationName = [self applicationNameForIdentifier:applicationIdentifier];
+		
+		__weak AJKExtendedOpening *weakSelf = self;
+		shortcutWindowController.completionBlock = ^(NSString *applicationIdentifier, NSString *keyEquivalent, NSNumber *modifierMask) {
+			[weakSelf addApplicationWithIdentifier:applicationIdentifier keyEquivalent:keyEquivalent modifierMask:modifierMask];
+		};
+
+		[shortcutWindowController showWindow:nil];
+		self.shortcutWindowController = shortcutWindowController;
+	}
+}
+
+
+- (void)addApplicationWithIdentifier:(NSString *)applicationIdentifier keyEquivalent:(NSString *)keyEquivalent modifierMask:(NSNumber *)modifierMask
+{
+	// A brute force way to avoid duplicates
+	[self removeApplicationWithIdentifier:applicationIdentifier];
+	
+	NSMutableArray *openWithApplicationsArray = [[[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications] mutableCopy];
+	
+	if(!openWithApplicationsArray) {
+		openWithApplicationsArray = [[NSMutableArray alloc] initWithCapacity:1];
 	}
 	
-	return YES;
+	if(applicationIdentifier.length) {
+		NSMutableDictionary *applicationDictionary = [[NSMutableDictionary alloc] init];
+		applicationDictionary[AJKApplicationIdentifier] = applicationIdentifier;
+		applicationDictionary[AJKApplicationKeyEquivalent] = keyEquivalent;
+		applicationDictionary[AJKApplicationKeyEquivalentModifierMask] = modifierMask;
+		[openWithApplicationsArray addObject:applicationDictionary];
+	}
+	
+	[[NSUserDefaults standardUserDefaults] setObject:openWithApplicationsArray forKey:AJKOpenWithApplications];
+	[self updateOpenWithApplicationMenu];
+}
+
+
+- (void)removeApplicationWithIdentifier:(NSString *)applicationIdentifier
+{
+	if(!applicationIdentifier) {
+		return;
+	}
+	
+	NSArray *openWithApplicationsArray = [[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications];
+	NSIndexSet *indexesToKeep = [openWithApplicationsArray indexesOfObjectsPassingTest:^BOOL(NSDictionary *applicationDictionary, NSUInteger idx, BOOL *stop) {
+		return [applicationDictionary[AJKApplicationIdentifier] isEqualToString:applicationIdentifier];
+	}];
+	
+	if(indexesToKeep.count < openWithApplicationsArray.count) {
+		NSArray *objectsToKeep = [openWithApplicationsArray objectsAtIndexes:indexesToKeep];
+		[[NSUserDefaults standardUserDefaults] setObject:objectsToKeep forKey:AJKOpenWithApplications];
+	}
+}
+
+
+- (void)openApplicationForMenuItem:(id)sender
+{
+	NSLog(@"sender: %@", sender);
 }
 
 
 
-#pragma mark - Actions for Menu Items
+- (void)updateOpenWithApplicationMenu
+{
+	NSMenu *applicationMenu = [[NSMenu alloc] initWithTitle:@""];
+	
+	NSArray *openWithApplications = [[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications];
+	NSInteger numberOfRegisteredApplication = openWithApplications.count;
+	
+	for(NSDictionary *applicationDictionary in openWithApplications) {
+		NSString *applicationIdentifier = applicationDictionary[AJKApplicationIdentifier];
+		NSString *keyEquivalent = applicationDictionary[AJKApplicationKeyEquivalent];
+		NSNumber *keyEquivalentModifier = applicationDictionary[AJKApplicationKeyEquivalentModifierMask];
+		
+		if(applicationIdentifier.length) {
+			NSString *title = [NSString stringWithFormat:@"Open with %@", applicationIdentifier];
+			NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(openApplicationForMenuItem:) keyEquivalent:keyEquivalent];
+			
+			if(keyEquivalentModifier) {
+				[menuItem setKeyEquivalentModifierMask:[keyEquivalentModifier integerValue]];
+			}
+			
+			[applicationMenu addItem:menuItem];
+		}
+	}
+	
+	if(numberOfRegisteredApplication > 0) {
+		[applicationMenu addItem:[NSMenuItem separatorItem]];
+	}
+	
+	NSMenuItem *addApplicationMenuItem = [[NSMenuItem alloc] initWithTitle:@"Add Application" action:@selector(registerOpenWithApplication:) keyEquivalent:@""];
+	[addApplicationMenuItem setTarget:self];
+	[applicationMenu addItem:addApplicationMenuItem];
+	
+	self.openInApplicationMenuItem.submenu = applicationMenu;
+}
 
+
+
+- (NSString *)applicationNameForIdentifier:(NSString *)applicationIdentifier
+{
+	NSBundle *bundle = [NSBundle bundleWithIdentifier:applicationIdentifier];
+	NSString *appName = [bundle infoDictionary][@"CFBundleName"];
+	
+	return appName;
+}
+
+
+#pragma mark -
 
 
 - (NSURL *)currentFileURL
@@ -256,11 +402,12 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 
 - (NSString *)requestApplicationIdentifierForTitle:(NSString *)title
 {
-	// Allow the user to choose which application they use as their external editor
+	// Allow the user to select an application
 	NSURL *applicationsFolderURL = [NSURL URLWithString:@"/Applications"];
 	NSArray *applicationDirectoryURLs = [[NSFileManager defaultManager] URLsForDirectory:NSApplicationDirectory inDomains:NSLocalDomainMask];
-	if([applicationDirectoryURLs count])
+	if([applicationDirectoryURLs count]) {
 		applicationsFolderURL = [applicationDirectoryURLs objectAtIndex:0];
+	}
 	
 	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
 	[openPanel setDirectoryURL:applicationsFolderURL];
@@ -280,7 +427,6 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 
 	return nil;
 }
-
 
 
 

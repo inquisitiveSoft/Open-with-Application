@@ -1,0 +1,3 @@
+[submodule "Source/ShortcutRecorder"]
+	path = Source/ShortcutRecorder
+	url = https://github.com/Kentzo/ShortcutRecorder
