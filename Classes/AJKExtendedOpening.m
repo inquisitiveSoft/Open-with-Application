@@ -19,7 +19,6 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 NSString * const AJKOpenWithApplications = @"AJKOpenWithApplications";
 
 NSString * const AJKApplicationIdentifier = @"AJKApplicationIdentifier";
-NSString * const AJKApplicationName = @"AJKApplicationName";
 NSString * const AJKShortcutScope = @"AJKShortcutScope";
 NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
@@ -59,7 +58,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		if(fileMenu && (desiredMenuItemIndex >= 0)) {
 			[fileMenu removeItemAtIndex:desiredMenuItemIndex];
 			
-			NSMenuItem *openWithExternalEditorMenuItem = [[NSMenuItem alloc] initWithTitle:@"Open with External Editor" action:@selector(openWithExternalEditor:) keyEquivalent:@"E"];
+			NSMenuItem *openWithExternalEditorMenuItem = [[NSMenuItem alloc] initWithTitle:@"Open with External Editor" action:@selector(openWithDefaultExternalEditor:) keyEquivalent:@"E"];
 			[openWithExternalEditorMenuItem setTarget:self];
 			[openWithExternalEditorMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask];
 			[fileMenu insertItem:openWithExternalEditorMenuItem atIndex:desiredMenuItemIndex];
@@ -143,20 +142,31 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 - (void)openScope:(AJKOpenWithScope)scope inExternalEditorForIdentifier:(NSString *)applicationIdentifier
 {
-	NSURL *urlToOpen = nil;
+	NSURL *urlToOpen = [self currentFileURL];
 	
-	if(urlToOpen) {
-		urlToOpen = [self currentFileURL];
-	} else {
+	if(scope == AJKOpenWithProjectScope) {
 		NSString *projectDirectory = [self projectDirectoryPath];
-		urlToOpen = [NSURL URLWithString:projectDirectory];
+		NSURL *projectURL = [NSURL URLWithString:projectDirectory];
+		
+		if(projectURL) {
+			urlToOpen = projectURL;
+		}
 	}
 	
-	if(urlToOpen) {
-		if([applicationIdentifier length]) {
+	NSLog(@"AJKExtendedOpening urlToOpen: %@", urlToOpen);
+	if(urlToOpen && [applicationIdentifier length]) {
+		// Handle special cases
+		if([applicationIdentifier isEqualToString:@"com.fournova.Tower2"]) {
+			// Tower (at least the second version) doesn't seem to handle NSWorkspace…openURLs
+			NSTask *task = [[NSTask alloc] init];
+			[task setCurrentDirectoryPath:urlToOpen.path];
+			[task setLaunchPath:@"/usr/bin/open"];
+			[task setArguments:@[@".", @"-a", @"Tower"]];
+			[task launch];
+		} else {
 			[[NSWorkspace sharedWorkspace] openURLs:@[urlToOpen]
 							withAppBundleIdentifier:applicationIdentifier
-											options:0
+											options:NSWorkspaceLaunchDefault
 					 additionalEventParamDescriptor:nil
 								  launchIdentifiers:nil];
 		}
@@ -201,12 +211,11 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 				NSString *command = [NSString stringWithFormat:@"clear; pushd '%@'", projectDirectory];
 				
 				SBApplication *iTerm = [SBApplication applicationWithBundleIdentifier:@"com.googlecode.iTerm2"];
-				BOOL shouldCreateNewTerminal = [iTerm isRunning];	// Seems to always return TRUE?
-				
 				[iTerm activate];
 				id currentTerminal = [iTerm valueForKey:@"currentTerminal"];
+				NSLog(@"currentTerminal: %@", currentTerminal);
 				
-				if(shouldCreateNewTerminal) {
+				if(!currentTerminal) {
 					currentTerminal = [[[iTerm classForScriptingClass:@"terminal"] alloc] init];
 					[[iTerm valueForKey:@"terminals"] addObject:currentTerminal];
 					[currentTerminal performSelector:@selector(launchSession:) withObject:@"Default Session"];
@@ -217,6 +226,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			}
 			
 			@catch (NSException *exception) {
+				NSLog(@"AJKExtendeddOpening: Encountered an exception while launching iTerm: %@", exception);
 			}
 		} else {
 			NSLog(@"Unrecognized terminal emulator: '%@'", applicationIdentifier);
@@ -273,8 +283,10 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		NSMutableDictionary *applicationDictionary = [[NSMutableDictionary alloc] init];
 		applicationDictionary[AJKApplicationIdentifier] = applicationIdentifier;
 		applicationDictionary[AJKShortcutScope] = @(scope);
-		applicationDictionary[AJKShortcutDictionary] = shortcut;
-		applicationDictionary[AJKApplicationName] = applicationName;
+		
+		if(shortcut) {
+			applicationDictionary[AJKShortcutDictionary] = shortcut;
+		}
 		
 		[openWithApplicationsArray addObject:applicationDictionary];
 	}
@@ -309,13 +321,12 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	
 	NSArray *openWithApplications = [[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications];
 	NSInteger numberOfRegisteredApplication = openWithApplications.count;
-	NSLog(@"openWithApplications: %@", openWithApplications);
 	
 	for(NSDictionary *applicationDictionary in openWithApplications) {
 		NSString *applicationIdentifier = applicationDictionary[AJKApplicationIdentifier];
 
 		if(applicationIdentifier.length) {
-			NSString *name = applicationDictionary[AJKApplicationName] ?: [self applicationNameForIdentifier:applicationIdentifier];
+			NSString *name = [self applicationNameForIdentifier:applicationIdentifier] ?: applicationIdentifier;
 			NSString *title = [NSString stringWithFormat:@"Open with %@", name];
 			
 			NSDictionary *shortcutDictionary = applicationDictionary[AJKShortcutDictionary];
@@ -351,9 +362,16 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 }
 
 
-- (void)openApplicationForMenuItem:(id)sender
+- (void)openApplicationForMenuItem:(NSMenuItem *)menuItem
 {
-	NSLog(@"sender: %@", sender);
+	NSString *applicationIdentifier = menuItem.representedObject;
+	AJKOpenWithScope scope = (AJKOpenWithScope)menuItem.tag;
+	
+	if(applicationIdentifier) {
+		[self openScope:scope inExternalEditorForIdentifier:applicationIdentifier];
+	} else {
+		NSLog(@"AJKExtendedOpening: Couldn't find application identifier for nemu item: %@", menuItem.title);
+	}
 }
 
 
