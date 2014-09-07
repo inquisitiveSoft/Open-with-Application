@@ -10,7 +10,7 @@
 
 #import <objc/runtime.h>
 #import <ScriptingBridge/ScriptingBridge.h>
-#import "AJKCreateShortcutWindowController.h"
+#import "AJKShortcutWindowController.h"
 #import "AJKGlobalDefines.h"
 
 
@@ -24,11 +24,11 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 
 
-@interface AJKExtendedOpening ()
+@interface AJKExtendedOpening () <AJKShortcutWindowControllerDelegate>
 
 @property (strong) NSMenuItem *openInApplicationMenuItem;
 
-@property (strong) AJKCreateShortcutWindowController *shortcutWindowController;
+@property (strong) AJKShortcutWindowController *shortcutWindowController;
 
 @end
 
@@ -119,6 +119,12 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		return [[self currentFileURL] isFileURL];
 	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
 		return [[self projectDirectoryPath] length] > 0;
+	} else if([menuItem action] == @selector(openApplicationForMenuItem:)) {
+		if(menuItem.tag == AJKOpenWithDocumentScope) {
+			return [[self currentFileURL] isFileURL];
+		} else {
+			return [[self projectDirectoryPath] length] > 0;
+		}
 	}
 	
 	return TRUE;
@@ -212,13 +218,10 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 				
 				SBApplication *iTerm = [SBApplication applicationWithBundleIdentifier:@"com.googlecode.iTerm2"];
 				[iTerm activate];
-				id currentTerminal = [iTerm valueForKey:@"currentTerminal"];
 				
-				if(!currentTerminal) {
-					currentTerminal = [[[iTerm classForScriptingClass:@"terminal"] alloc] init];
-					[[iTerm valueForKey:@"terminals"] addObject:currentTerminal];
-					[currentTerminal performSelector:@selector(launchSession:) withObject:@"Default Session"];
-				}
+				id currentTerminal = [[[iTerm classForScriptingClass:@"terminal"] alloc] init];
+				[[iTerm valueForKey:@"terminals"] addObject:currentTerminal];
+				[currentTerminal performSelector:@selector(launchSession:) withObject:@"Default Session"];
 				
 				id currentSession = [currentTerminal valueForKey:@"currentSession"];
 				[currentSession performSelector:@selector(writeContentsOfFile:text:) withObject:nil withObject:command];
@@ -242,32 +245,132 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 
 
-#pragma mark - The custom application menu
+#pragma mark - Managing the Open with… menu
 
 
- - (void)registerOpenWithApplication:(id)sender
+- (void)registerOpenWithApplicationShortcut:(id)sender
 {
 	NSString *applicationIdentifier = [self requestApplicationIdentifierForTitle:@"Select an Application"];
+	[self presentShortcutWindowForApplicationIdentifier:applicationIdentifier mode:AJKShortcutWindowCreateMode shortcut:nil];
+}
+
+
+- (void)openApplicationForMenuItem:(NSMenuItem *)menuItem
+{
+	NSString *applicationIdentifier = menuItem.representedObject;
+	AJKOpenWithScope scope = (AJKOpenWithScope)menuItem.tag;
 	
 	if(applicationIdentifier) {
-		AJKCreateShortcutWindowController *shortcutWindowController = [[AJKCreateShortcutWindowController alloc] init];
-		shortcutWindowController.applicationIdentifier = applicationIdentifier;
-		
-		NSString *applicationName = [self applicationNameForIdentifier:applicationIdentifier];
-		shortcutWindowController.applicationName = applicationName;
-		
-		__weak AJKExtendedOpening *weakSelf = self;
-		shortcutWindowController.completionBlock = ^(NSString *applicationIdentifier, AJKOpenWithScope scope, NSDictionary *shortcut) {
-			[weakSelf addApplicationWithIdentifier:applicationIdentifier name:applicationName scope:scope shortcut:shortcut];
-		};
-		
-		[shortcutWindowController showWindow:nil];
-		self.shortcutWindowController = shortcutWindowController;
+		[self openScope:scope inExternalEditorForIdentifier:applicationIdentifier];
+	} else {
+		NSLog(@"AJKExtendedOpening: Couldn't find application identifier for nemu item: %@", menuItem.title);
 	}
 }
 
 
-- (void)addApplicationWithIdentifier:(NSString *)applicationIdentifier name:(NSString *)applicationName scope:(AJKOpenWithScope)scope shortcut:(NSDictionary *)shortcut
+- (void)editApplicationShortcutForMenuItem:(NSMenuItem *)menuItem
+{
+	NSString *applicationIdentifier = menuItem.representedObject;
+	
+	if(!applicationIdentifier) {
+		return;
+	}
+	
+	
+	NSArray *openWithApplications = [[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications];
+	
+	for(NSDictionary *applicationDictionary in openWithApplications) {
+		if([applicationDictionary[AJKApplicationIdentifier] isEqualToString:applicationIdentifier]) {
+			[self presentShortcutWindowForApplicationIdentifier:applicationIdentifier mode:AJKShortcutWindowEditMode shortcut:applicationDictionary[AJKShortcutDictionary]];
+			break;
+		}
+	}
+}
+
+
+
+
+- (void)presentShortcutWindowForApplicationIdentifier:(NSString *)applicationIdentifier mode:(AJKShortcutWindowMode)mode shortcut:(NSDictionary *)shortcutDictionary
+{
+	if(!applicationIdentifier) {
+		return;
+	}
+	
+	AJKShortcutWindowController *shortcutWindowController = [[AJKShortcutWindowController alloc] init];
+	shortcutWindowController.delegate = self;
+	shortcutWindowController.mode = mode;
+	
+	shortcutWindowController.applicationIdentifier = applicationIdentifier;
+	shortcutWindowController.applicationName = [self applicationNameForIdentifier:applicationIdentifier];
+	shortcutWindowController.shortcutDictionary = shortcutDictionary;
+	
+	[shortcutWindowController showWindow:nil];
+	self.shortcutWindowController = shortcutWindowController;
+}
+
+
+
+- (void)updateOpenWithApplicationMenu
+{
+	NSMenu *applicationMenu = [[NSMenu alloc] initWithTitle:@""];
+	
+	NSArray *openWithApplications = [[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications];
+	NSInteger numberOfRegisteredApplication = openWithApplications.count;
+	
+	for(NSDictionary *applicationDictionary in openWithApplications) {
+		NSString *applicationIdentifier = applicationDictionary[AJKApplicationIdentifier];
+		
+		if(applicationIdentifier.length) {
+			NSString *name = [self applicationNameForIdentifier:applicationIdentifier] ?: applicationIdentifier;
+			
+			
+			// Gather the shortcut paramaters
+			NSDictionary *shortcutDictionary = applicationDictionary[AJKShortcutDictionary];
+			SRKeyEquivalentTransformer *keyEquivalentTransformer = [[SRKeyEquivalentTransformer alloc] init];
+			NSString *keyEquivalent = [keyEquivalentTransformer transformedValue:shortcutDictionary];
+			
+			SRKeyEquivalentModifierMaskTransformer *keyEquivalentModifierMaskTransformer = [[SRKeyEquivalentModifierMaskTransformer alloc] init];
+			NSNumber *keyEquivalentModifier = [keyEquivalentModifierMaskTransformer transformedValue:shortcutDictionary];
+			
+			
+			// Add the Open With… menu item
+			NSString *title = [NSString stringWithFormat:@"Open With %@", name];
+			NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(openApplicationForMenuItem:) keyEquivalent:keyEquivalent];
+			menuItem.target = self;
+			menuItem.representedObject = applicationIdentifier;
+			menuItem.tag = [applicationDictionary[AJKShortcutScope] integerValue];
+			[menuItem setKeyEquivalentModifierMask:[keyEquivalentModifier integerValue]];
+			[applicationMenu addItem:menuItem];
+			
+			
+			// Add the Edit menu item
+			title = [NSString stringWithFormat:@"Edit Shortcut for %@", name];
+			NSMenuItem *editMenuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(editApplicationShortcutForMenuItem:) keyEquivalent:keyEquivalent];
+			editMenuItem.target = self;
+			editMenuItem.representedObject = applicationIdentifier;
+			[editMenuItem setKeyEquivalentModifierMask:[keyEquivalentModifier integerValue] | NSControlKeyMask];
+			[editMenuItem setAlternate:TRUE];
+			[applicationMenu addItem:editMenuItem];
+		}
+	}
+	
+	if(numberOfRegisteredApplication > 0) {
+		[applicationMenu addItem:[NSMenuItem separatorItem]];
+	}
+	
+	NSString *title = NSLocalizedString(@"Add Shortcut for Application…", @"Shortcut menu item");
+	NSMenuItem *addApplicationMenuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(registerOpenWithApplicationShortcut:) keyEquivalent:@""];
+	[addApplicationMenuItem setTarget:self];
+	[applicationMenu addItem:addApplicationMenuItem];
+	
+	self.openInApplicationMenuItem.submenu = applicationMenu;
+}
+
+
+#pragma mark - AJKCreateShortcutWindowControllerDelegate methods
+
+
+- (void)addApplicationWithIdentifier:(NSString *)applicationIdentifier scope:(AJKOpenWithScope)scope shortcut:(NSDictionary *)shortcut
 {
 	// A brute force way to avoid duplicates
 	[self removeApplicationWithIdentifier:applicationIdentifier];
@@ -292,7 +395,6 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	
 	[[NSUserDefaults standardUserDefaults] setObject:openWithApplicationsArray forKey:AJKOpenWithApplications];
 	[[NSUserDefaults standardUserDefaults] synchronize];
-	[self updateOpenWithApplicationMenu];
 }
 
 
@@ -310,101 +412,18 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	if(indexesToKeep.count < openWithApplicationsArray.count) {
 		NSArray *objectsToKeep = [openWithApplicationsArray objectsAtIndexes:indexesToKeep];
 		[[NSUserDefaults standardUserDefaults] setObject:objectsToKeep forKey:AJKOpenWithApplications];
+		[[NSUserDefaults standardUserDefaults] synchronize];
 	}
 }
 
 
-- (void)updateOpenWithApplicationMenu
+- (void)didDismissWindowController:(NSWindowController *)windowController
 {
-	NSMenu *applicationMenu = [[NSMenu alloc] initWithTitle:@""];
-	
-	NSArray *openWithApplications = [[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications];
-	NSInteger numberOfRegisteredApplication = openWithApplications.count;
-	
-	for(NSDictionary *applicationDictionary in openWithApplications) {
-		NSString *applicationIdentifier = applicationDictionary[AJKApplicationIdentifier];
-
-		if(applicationIdentifier.length) {
-			NSString *name = [self applicationNameForIdentifier:applicationIdentifier] ?: applicationIdentifier;
-			
-			// Gather the shortcut paramaters
-			NSDictionary *shortcutDictionary = applicationDictionary[AJKShortcutDictionary];
-			SRKeyEquivalentTransformer *keyEquivalentTransformer = [[SRKeyEquivalentTransformer alloc] init];
-			NSString *keyEquivalent = [keyEquivalentTransformer transformedValue:shortcutDictionary];
-			
-			SRKeyEquivalentModifierMaskTransformer *keyEquivalentModifierMaskTransformer = [[SRKeyEquivalentModifierMaskTransformer alloc] init];
-			NSNumber *keyEquivalentModifier = [keyEquivalentModifierMaskTransformer transformedValue:shortcutDictionary];
-
-			
-			// Create the main menu item
-			NSString *title = [NSString stringWithFormat:@"Open With %@", name];
-			NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(openApplicationForMenuItem:) keyEquivalent:keyEquivalent];
-			menuItem.tag = [applicationDictionary[AJKShortcutScope] integerValue];
-			menuItem.target = self;
-			menuItem.representedObject = applicationIdentifier;
-			[applicationMenu addItem:menuItem];
-			
-			if(keyEquivalentModifier) {
-				[menuItem setKeyEquivalentModifierMask:[keyEquivalentModifier integerValue]];
-			}
-			
-			
-			// Create the remove menu item
-			title = [NSString stringWithFormat:@"Edit Shortcut for %@", name];
-			NSMenuItem *removeMenuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(removeApplicationMenuItem:) keyEquivalent:keyEquivalent];
-			removeMenuItem.target = self;
-			removeMenuItem.representedObject = applicationIdentifier;
-			[removeMenuItem setAlternate:TRUE];
-			[applicationMenu addItem:removeMenuItem];
-			
-			if(keyEquivalentModifier) {
-				NSInteger modifier = [keyEquivalentModifier integerValue];
-				modifier |= NSControlKeyMask;
-				
-				[removeMenuItem setKeyEquivalentModifierMask:modifier];
-			}
-
-		}
+	if(self.shortcutWindowController == windowController) {
+		self.shortcutWindowController = nil;
 	}
 	
-	if(numberOfRegisteredApplication > 0) {
-		[applicationMenu addItem:[NSMenuItem separatorItem]];
-	}
-	
-	NSMenuItem *addApplicationMenuItem = [[NSMenuItem alloc] initWithTitle:@"Add Application" action:@selector(registerOpenWithApplication:) keyEquivalent:@""];
-	[addApplicationMenuItem setTarget:self];
-	[applicationMenu addItem:addApplicationMenuItem];
-	
-	self.openInApplicationMenuItem.submenu = applicationMenu;
-}
-
-
-- (void)openApplicationForMenuItem:(NSMenuItem *)menuItem
-{
-	NSString *applicationIdentifier = menuItem.representedObject;
-	AJKOpenWithScope scope = (AJKOpenWithScope)menuItem.tag;
-	
-	if(applicationIdentifier) {
-		[self openScope:scope inExternalEditorForIdentifier:applicationIdentifier];
-	} else {
-		NSLog(@"AJKExtendedOpening: Couldn't find application identifier for nemu item: %@", menuItem.title);
-	}
-}
-
-
-- (void)removeApplicationMenuItem:(NSMenuItem *)menuItem
-{
-	NSString *applicationIdentifier = menuItem.representedObject;
-	NSLog(@"removeApplicationMenuItem applicationIdentifier: %@", applicationIdentifier);
-	
-	[self removeApplicationWithIdentifier:applicationIdentifier];
 	[self updateOpenWithApplicationMenu];
-}
-
-
-- (void)editApplicationShortcutForMenuItem:(NSMenuItem *)menuItem
-{
-	
 }
 
 

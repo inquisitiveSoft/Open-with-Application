@@ -7,7 +7,7 @@
 //
 
 
-typedef NS_ENUM(NSInteger, AJKOpenWithScope) {
-	AJKOpenWithProjectScope = 0,
-	AJKOpenWithDocumentScope = 1,
+typedef NS_ENUM(NSInteger, AJKShortcutScope) {
+	AJKShortcutScopeProject = 0,
+	AJKShortcutScopeDocument = 1,
 };

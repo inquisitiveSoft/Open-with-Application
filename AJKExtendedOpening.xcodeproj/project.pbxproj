@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		4A0787E019BBA0DF00114ECE /* ShortcutRecorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0787DB19BBA0CA00114ECE /* ShortcutRecorder.framework */; };
 		4A0787E319BBA0E900114ECE /* ShortcutRecorder.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0787DB19BBA0CA00114ECE /* ShortcutRecorder.framework */; };
-		4A27B2F419BBCA2900111F65 /* AJKCreateShortcutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A27B2F219BBCA2900111F65 /* AJKCreateShortcutWindowController.m */; };
+		4A27B2F419BBCA2900111F65 /* AJKShortcutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */; };
 		4A56D6191608076A00AFA23C /* AJKExtendedOpening.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A4250641607FB5A00277699 /* AJKExtendedOpening.m */; };
 		4A56D61B1608076A00AFA23C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 089C1672FE841209C02AAC07 /* Foundation.framework */; };
 		4A56D61C1608076A00AFA23C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F2EB899145057EA00E97A87 /* AppKit.framework */; };
@@ -73,8 +73,8 @@
 /* Begin PBXFileReference section */
 		089C1672FE841209C02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		4A0787D419BBA0CA00114ECE /* ShortcutRecorder.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShortcutRecorder.xcodeproj; path = Source/ShortcutRecorder/ShortcutRecorder.xcodeproj; sourceTree = "<group>"; };
-		4A27B2F119BBCA2900111F65 /* AJKCreateShortcutWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKCreateShortcutWindowController.h; sourceTree = "<group>"; };
-		4A27B2F219BBCA2900111F65 /* AJKCreateShortcutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKCreateShortcutWindowController.m; sourceTree = "<group>"; };
+		4A27B2F119BBCA2900111F65 /* AJKShortcutWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKShortcutWindowController.h; sourceTree = "<group>"; };
+		4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKShortcutWindowController.m; sourceTree = "<group>"; };
 		4A4250641607FB5A00277699 /* AJKExtendedOpening.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKExtendedOpening.m; sourceTree = "<group>"; };
 		4A4734DA160B382D00A14793 /* AJKExtendedOpening.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKExtendedOpening.h; sourceTree = "<group>"; };
 		4A56D61F1608076A00AFA23C /* AJKExtendedOpening.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AJKExtendedOpening.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -104,7 +104,6 @@
 			children = (
 				7F411B0C15FABAC6002F77B6 /* Classes */,
 				089C167CFE841241C02AAC07 /* Resources */,
-				089C1671FE841209C02AAC07 /* Frameworks and Libraries */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
 			);
 			name = QuietXcode;
@@ -119,6 +118,7 @@
 				4A0787D419BBA0CA00114ECE /* ShortcutRecorder.xcodeproj */,
 			);
 			name = "Frameworks and Libraries";
+			path = ..;
 			sourceTree = "<group>";
 		};
 		089C167CFE841241C02AAC07 /* Resources */ = {
@@ -151,10 +151,11 @@
 			isa = PBXGroup;
 			children = (
 				4AC443F419BC5F5D0041D2E1 /* AJKGlobalDefines.h */,
+				089C1671FE841209C02AAC07 /* Frameworks and Libraries */,
 				4A4734DA160B382D00A14793 /* AJKExtendedOpening.h */,
 				4A4250641607FB5A00277699 /* AJKExtendedOpening.m */,
-				4A27B2F119BBCA2900111F65 /* AJKCreateShortcutWindowController.h */,
-				4A27B2F219BBCA2900111F65 /* AJKCreateShortcutWindowController.m */,
+				4A27B2F119BBCA2900111F65 /* AJKShortcutWindowController.h */,
+				4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -245,7 +246,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A56D6191608076A00AFA23C /* AJKExtendedOpening.m in Sources */,
-				4A27B2F419BBCA2900111F65 /* AJKCreateShortcutWindowController.m in Sources */,
+				4A27B2F419BBCA2900111F65 /* AJKShortcutWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
