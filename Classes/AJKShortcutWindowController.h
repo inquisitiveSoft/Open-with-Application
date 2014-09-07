@@ -18,11 +18,9 @@ typedef NS_ENUM(NSInteger, AJKShortcutWindowMode) {
 };
 
 
-typedef void (^AJKAddApplicationBlock)(NSString *applicationIdentifier, AJKOpenWithScope scope, NSDictionary *shortcutDictionary);
-
 @protocol AJKShortcutWindowControllerDelegate <NSObject>
 
-- (void)addApplicationWithIdentifier:(NSString *)applicationIdentifier scope:(AJKOpenWithScope)scope shortcut:(NSDictionary *)shortcut;
+- (void)addApplicationWithIdentifier:(NSString *)applicationIdentifier scope:(AJKShortcutScope)scope shortcut:(NSDictionary *)shortcut;
 - (void)removeApplicationWithIdentifier:(NSString *)applicationIdentifier;
 
 - (void)didDismissWindowController:(NSWindowController *)windowController;

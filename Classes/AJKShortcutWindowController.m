@@ -12,6 +12,8 @@
 
 @interface AJKShortcutWindowController () <SRRecorderControlDelegate>
 
+@property (strong) SRValidator *shortcutValidator;
+
 @property (unsafe_unretained, nonatomic) NSTextField *descriptionLabel;
 @property (unsafe_unretained, nonatomic) SRRecorderControl *shortcutControl;
 @property (unsafe_unretained, nonatomic) NSSegmentedControl *scopeSegmentedControl;
@@ -29,6 +31,8 @@
 	self = [super init];
 	
 	if(self) {
+		self.shortcutValidator = [[SRValidator alloc] init];
+		
 		[self loadWindow];
 	}
 	
@@ -38,8 +42,7 @@
 
 - (void)loadWindow
 {
-	NSInteger styleMask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask;
-	NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 340.0, 266.0) styleMask:styleMask backing:NSBackingStoreBuffered defer:TRUE];
+	NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 340.0, 266.0) styleMask:NSTitledWindowMask backing:NSBackingStoreBuffered defer:TRUE];
 	self.window = window;
 	NSView *contentView = window.contentView;
 	
@@ -70,7 +73,7 @@
 	
 	NSSegmentedControl *scopeSegmentedControl = [[NSSegmentedControl alloc] initWithFrame:scopeFrame];
 	scopeSegmentedControl.segmentCount = 2;
-	[scopeSegmentedControl setLabel:NSLocalizedString(@"Active Project", @"") forSegment:0];
+	[scopeSegmentedControl setLabel:NSLocalizedString(@"Project Folder", @"") forSegment:0];
 	[scopeSegmentedControl setLabel:NSLocalizedString(@"Current Document", @"") forSegment:1];
 	[scopeSegmentedControl setSelectedSegment:0];
 	
@@ -116,7 +119,7 @@
 
 
 	// Insert the cancel button
-	CGFloat cancelButtonWidth = 136.0;
+	CGFloat cancelButtonWidth = 140.0;
 	NSRect cancelFrame = NSInsetRect(contentView.frame, 20.0, 8.0);
 	cancelFrame.size = NSMakeSize(cancelButtonWidth, 44.0);
 	
@@ -130,7 +133,7 @@
 	
 	
 	// Insert the create button
-	CGFloat createButtonWidth = 130.0;
+	CGFloat createButtonWidth = 140.0;
 	NSRect createFrame = NSInsetRect(contentView.bounds, 20.0, 8.0);
 	createFrame.origin.x = createFrame.size.width - createButtonWidth;
 	createFrame.size = NSMakeSize(createButtonWidth + 16.0, 44.0);
@@ -173,6 +176,14 @@
 - (void)showWindow:(id)sender
 {
 	// Prepare the window
+	if(self.mode == AJKShortcutWindowCreateMode) {
+		NSString *title = NSLocalizedString(@"Create shortcut for %@", @"Create Shortcut window title");
+		self.window.title = [NSString stringWithFormat:title, self.applicationName];
+	} else {
+		NSString *title = NSLocalizedString(@"Edit the 'Open With %@' Shortcut", @"Edit Shortcut window title");
+		self.window.title = [NSString stringWithFormat:title, self.applicationName];
+	}
+	
 	NSString *description = NSLocalizedString(@"Set a keyboard shortcut for the\n'Open with %@' menu item", @"");
 	description = [NSString stringWithFormat:description, self.applicationName];
 	[self.descriptionLabel setStringValue:description];
@@ -229,6 +240,34 @@
 	if([delegate respondsToSelector:@selector(didDismissWindowController:)]) {
 		[delegate didDismissWindowController:self];
 	}
+}
+
+
+#pragma mark - Shortcut Recorder delegate methods
+
+
+- (BOOL)shortcutRecorder:(SRRecorderControl *)aRecorder canRecordShortcut:(NSDictionary *)shortcut
+{
+	if(SRShortcutEqualToShortcut(shortcut, self.shortcutDictionary)) {
+		// Allow the key combo to be set to the existing value
+		return TRUE;
+	}
+	
+	// Otherwise look for an existing key combo
+	NSNumber *keyCode = shortcut[SRShortcutKeyCode];
+	BOOL isValid = FALSE;
+	
+	if(keyCode) {
+		NSError *error = nil;
+		NSNumber *flags = shortcut[SRShortcutModifierFlagsKey];
+		isValid = ![self.shortcutValidator isKeyCode:[keyCode shortValue] andFlagsTaken:[flags integerValue] error:&error];
+		
+		if(!isValid) {
+			NSBeep();
+		}
+	}
+	
+	return isValid;
 }
 
 

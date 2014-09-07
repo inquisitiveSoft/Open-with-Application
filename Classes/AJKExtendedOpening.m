@@ -19,7 +19,7 @@ NSString * const AJKPreferedTerminalBundleIdentifier = @"AJKPreferedTerminalBund
 NSString * const AJKOpenWithApplications = @"AJKOpenWithApplications";
 
 NSString * const AJKApplicationIdentifier = @"AJKApplicationIdentifier";
-NSString * const AJKShortcutScope = @"AJKShortcutScope";
+NSString * const AJKShortcutScopeKey = @"AJKShortcutScopeKey";
 NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 
@@ -120,7 +120,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
 		return [[self projectDirectoryPath] length] > 0;
 	} else if([menuItem action] == @selector(openApplicationForMenuItem:)) {
-		if(menuItem.tag == AJKOpenWithDocumentScope) {
+		if(menuItem.tag == AJKShortcutScopeDocument) {
 			return [[self currentFileURL] isFileURL];
 		} else {
 			return [[self projectDirectoryPath] length] > 0;
@@ -142,15 +142,15 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		applicationIdentifier = [self selectExternalEditor:nil];
 	}
 	
-	[self openScope:AJKOpenWithDocumentScope inExternalEditorForIdentifier:applicationIdentifier];
+	[self openScope:AJKShortcutScopeDocument inExternalEditorForIdentifier:applicationIdentifier];
 }
 
 
-- (void)openScope:(AJKOpenWithScope)scope inExternalEditorForIdentifier:(NSString *)applicationIdentifier
+- (void)openScope:(AJKShortcutScope)scope inExternalEditorForIdentifier:(NSString *)applicationIdentifier
 {
 	NSURL *urlToOpen = [self currentFileURL];
 	
-	if(scope == AJKOpenWithProjectScope) {
+	if(scope == AJKShortcutScopeProject) {
 		NSString *projectDirectory = [self projectDirectoryPath];
 		NSURL *projectURL = [NSURL URLWithString:projectDirectory];
 		
@@ -258,7 +258,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 - (void)openApplicationForMenuItem:(NSMenuItem *)menuItem
 {
 	NSString *applicationIdentifier = menuItem.representedObject;
-	AJKOpenWithScope scope = (AJKOpenWithScope)menuItem.tag;
+	AJKShortcutScope scope = (AJKShortcutScope)menuItem.tag;
 	
 	if(applicationIdentifier) {
 		[self openScope:scope inExternalEditorForIdentifier:applicationIdentifier];
@@ -285,6 +285,8 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			break;
 		}
 	}
+	
+	[self removeApplicationWithIdentifier:applicationIdentifier];
 }
 
 
@@ -338,7 +340,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(openApplicationForMenuItem:) keyEquivalent:keyEquivalent];
 			menuItem.target = self;
 			menuItem.representedObject = applicationIdentifier;
-			menuItem.tag = [applicationDictionary[AJKShortcutScope] integerValue];
+			menuItem.tag = [applicationDictionary[AJKShortcutScopeKey] integerValue];
 			[menuItem setKeyEquivalentModifierMask:[keyEquivalentModifier integerValue]];
 			[applicationMenu addItem:menuItem];
 			
@@ -370,7 +372,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 #pragma mark - AJKCreateShortcutWindowControllerDelegate methods
 
 
-- (void)addApplicationWithIdentifier:(NSString *)applicationIdentifier scope:(AJKOpenWithScope)scope shortcut:(NSDictionary *)shortcut
+- (void)addApplicationWithIdentifier:(NSString *)applicationIdentifier scope:(AJKShortcutScope)scope shortcut:(NSDictionary *)shortcut
 {
 	// A brute force way to avoid duplicates
 	[self removeApplicationWithIdentifier:applicationIdentifier];
@@ -384,7 +386,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	if(applicationIdentifier.length) {
 		NSMutableDictionary *applicationDictionary = [[NSMutableDictionary alloc] init];
 		applicationDictionary[AJKApplicationIdentifier] = applicationIdentifier;
-		applicationDictionary[AJKShortcutScope] = @(scope);
+		applicationDictionary[AJKShortcutScopeKey] = @(scope);
 		
 		if(shortcut) {
 			applicationDictionary[AJKShortcutDictionary] = shortcut;
