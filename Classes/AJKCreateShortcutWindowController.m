@@ -12,8 +12,10 @@
 
 @interface AJKCreateShortcutWindowController () <SRRecorderControlDelegate>
 
-@property (strong) NSTextField *descriptionLabel;
-@property (strong) SRRecorderControl *shortcutControl;
+@property (unsafe_unretained, nonatomic) NSTextField *descriptionLabel;
+@property (unsafe_unretained, nonatomic) SRRecorderControl *shortcutControl;
+@property (unsafe_unretained, nonatomic) NSSegmentedControl *scopeSegmentedControl;
+@property (unsafe_unretained, nonatomic) NSButton *createShortcutButton;
 
 @end
 
@@ -75,6 +77,7 @@
 	scopeSegmentedControl.frame = scopeFrame;
 	
 	[contentView addSubview:scopeSegmentedControl];
+	self.scopeSegmentedControl = scopeSegmentedControl;
 	
 	// Insert the description label
 	CGFloat descriptionHeight = 40.0;
@@ -137,6 +140,7 @@
 	[createButton setTarget:self];
 	[createButton setAction:@selector(createShortcut:)];
 	[contentView addSubview:createButton];
+	self.createShortcutButton = createButton;
 }
 
 
@@ -156,11 +160,10 @@
 	AJKAddApplicationBlock addApplicationBlock = self.completionBlock;
 	
 	if(addApplicationBlock) {
-		NSDictionary *shortcut = self.shortcutRecorder.objectValue;
-		NSLog(@"shortcut: %@", shortcut);
-		
-//		addApplicationBlock(self.applicationIdentifier, , self.modifierMask);
+		addApplicationBlock(self.applicationIdentifier, [self.scopeSegmentedControl selectedSegment], self.shortcutControl.objectValue);
 	}
+	
+	[self dismiss:nil];
 }
 
 
@@ -168,13 +171,6 @@
 {
 	[self.window close];
 }
-
-
-
-#pragma mark - SRRecorderControlDelegate methods
-
-
-
 
 
 

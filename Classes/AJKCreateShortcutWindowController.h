@@ -9,16 +9,16 @@
 #import <Cocoa/Cocoa.h>
 #import <ShortcutRecorder/ShortcutRecorder.h>
 
-typedef void (^AJKAddApplicationBlock)(NSString *applicationIdentifier, NSString *keyboardShortcut, NSNumber *modifierMask);
+#import "AJKGlobalDefines.h"
+
+
+typedef void (^AJKAddApplicationBlock)(NSString *applicationIdentifier, AJKOpenWithScope scope, NSDictionary *shortcutDictionary);
 
 
 @interface AJKCreateShortcutWindowController : NSWindowController
 
 @property (copy) NSString *applicationIdentifier, *applicationName;
 @property (copy) AJKAddApplicationBlock completionBlock;
-
-@property (unsafe_unretained) IBOutlet SRRecorderControl *shortcutRecorder;
-@property (unsafe_unretained) IBOutlet NSButton *createMenuItemButton;
 
 - (IBAction)createShortcut:(id)sender;
 - (IBAction)dismiss:(id)sender;
