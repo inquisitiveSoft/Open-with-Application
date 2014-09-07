@@ -1,6 +1,6 @@
 ![File menu screenshot](Menu-screenshot.jpg)
 
-# About Open with…
+# About Open with Application
 Open with… is a simple plugin for Xcode that makes it easy to open the current project or the focused file either in the Finder or the Terminal, or any other application of your choice. You can also assign custom keyboard shortcuts.
 
 Holding down the Control key while entering the menu will allow you to choose the application used as the external editor.
@@ -19,4 +19,5 @@ Building the project will install the plug-in in the '~/Library/Application Supp
 
 # License
 Released under the MIT license:	[http://opensource.org/licenses/mit-license.php](http://opensource.org/licenses/mit-license.php)
+
 Links against ShortcutRecorder which is under the BSD license
