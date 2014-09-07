@@ -42,6 +42,7 @@
 	self.window = window;
 	NSView *contentView = window.contentView;
 	
+	
 	CGFloat scopeLabelHeight = 20.0;
 	NSRect scopeLabelFrame = NSInsetRect(contentView.bounds, 12.0, 30.0);
 	NSRect scopeFrame = scopeLabelFrame;
@@ -79,6 +80,7 @@
 	[contentView addSubview:scopeSegmentedControl];
 	self.scopeSegmentedControl = scopeSegmentedControl;
 	
+	
 	// Insert the description label
 	CGFloat descriptionHeight = 40.0;
 	descriptionFrame.origin.y += descriptionFrame.size.height - descriptionHeight - scopeHeight - 26;
@@ -105,7 +107,7 @@
 	
 	SRRecorderControl *shortcutControl = [[SRRecorderControl alloc] initWithFrame:shortcutControlFrame];
 	shortcutControl.delegate = self;
-	[shortcutControl setAllowedModifierFlags:SRCocoaModifierFlagsMask requiredModifierFlags:0 allowsEmptyModifierFlags:FALSE];
+	[shortcutControl setAllowedModifierFlags:(NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask) requiredModifierFlags:0 allowsEmptyModifierFlags:FALSE];
 	self.shortcutControl = shortcutControl;
 
 	[contentView addSubview:shortcutControl];

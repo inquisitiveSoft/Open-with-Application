@@ -213,7 +213,6 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 				SBApplication *iTerm = [SBApplication applicationWithBundleIdentifier:@"com.googlecode.iTerm2"];
 				[iTerm activate];
 				id currentTerminal = [iTerm valueForKey:@"currentTerminal"];
-				NSLog(@"currentTerminal: %@", currentTerminal);
 				
 				if(!currentTerminal) {
 					currentTerminal = [[[iTerm classForScriptingClass:@"terminal"] alloc] init];
@@ -327,26 +326,44 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 		if(applicationIdentifier.length) {
 			NSString *name = [self applicationNameForIdentifier:applicationIdentifier] ?: applicationIdentifier;
-			NSString *title = [NSString stringWithFormat:@"Open with %@", name];
 			
+			// Gather the shortcut paramaters
 			NSDictionary *shortcutDictionary = applicationDictionary[AJKShortcutDictionary];
 			SRKeyEquivalentTransformer *keyEquivalentTransformer = [[SRKeyEquivalentTransformer alloc] init];
 			NSString *keyEquivalent = [keyEquivalentTransformer transformedValue:shortcutDictionary];
 			
+			SRKeyEquivalentModifierMaskTransformer *keyEquivalentModifierMaskTransformer = [[SRKeyEquivalentModifierMaskTransformer alloc] init];
+			NSNumber *keyEquivalentModifier = [keyEquivalentModifierMaskTransformer transformedValue:shortcutDictionary];
+
+			
+			// Create the main menu item
+			NSString *title = [NSString stringWithFormat:@"Open With %@", name];
 			NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(openApplicationForMenuItem:) keyEquivalent:keyEquivalent];
-			menuItem.title = title;
 			menuItem.tag = [applicationDictionary[AJKShortcutScope] integerValue];
 			menuItem.target = self;
 			menuItem.representedObject = applicationIdentifier;
-			
-			SRKeyEquivalentModifierMaskTransformer *keyEquivalentModifierMaskTransformer = [[SRKeyEquivalentModifierMaskTransformer alloc] init];
-			NSNumber *keyEquivalentModifier = [keyEquivalentModifierMaskTransformer transformedValue:shortcutDictionary];
+			[applicationMenu addItem:menuItem];
 			
 			if(keyEquivalentModifier) {
 				[menuItem setKeyEquivalentModifierMask:[keyEquivalentModifier integerValue]];
 			}
 			
-			[applicationMenu addItem:menuItem];
+			
+			// Create the remove menu item
+			title = [NSString stringWithFormat:@"Edit Shortcut for %@", name];
+			NSMenuItem *removeMenuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(removeApplicationMenuItem:) keyEquivalent:keyEquivalent];
+			removeMenuItem.target = self;
+			removeMenuItem.representedObject = applicationIdentifier;
+			[removeMenuItem setAlternate:TRUE];
+			[applicationMenu addItem:removeMenuItem];
+			
+			if(keyEquivalentModifier) {
+				NSInteger modifier = [keyEquivalentModifier integerValue];
+				modifier |= NSControlKeyMask;
+				
+				[removeMenuItem setKeyEquivalentModifierMask:modifier];
+			}
+
 		}
 	}
 	
@@ -375,19 +392,21 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 }
 
 
-
-- (NSString *)applicationNameForIdentifier:(NSString *)applicationIdentifier
+- (void)removeApplicationMenuItem:(NSMenuItem *)menuItem
 {
-	NSString *appName = nil;
+	NSString *applicationIdentifier = menuItem.representedObject;
+	NSLog(@"removeApplicationMenuItem applicationIdentifier: %@", applicationIdentifier);
 	
-	if(applicationIdentifier) {
-		NSURL *applicationURL = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:applicationIdentifier];
-		NSBundle *bundle = [NSBundle bundleWithURL:applicationURL];
-		appName = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
-	}
-	
-	return appName;
+	[self removeApplicationWithIdentifier:applicationIdentifier];
+	[self updateOpenWithApplicationMenu];
 }
+
+
+- (void)editApplicationShortcutForMenuItem:(NSMenuItem *)menuItem
+{
+	
+}
+
 
 
 #pragma mark -
@@ -483,6 +502,20 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	}
 
 	return nil;
+}
+
+
+- (NSString *)applicationNameForIdentifier:(NSString *)applicationIdentifier
+{
+	NSString *appName = nil;
+	
+	if(applicationIdentifier) {
+		NSURL *applicationURL = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:applicationIdentifier];
+		NSBundle *bundle = [NSBundle bundleWithURL:applicationURL];
+		appName = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
+	}
+	
+	return appName;
 }
 
 
