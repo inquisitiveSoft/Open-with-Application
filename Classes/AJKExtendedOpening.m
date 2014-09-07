@@ -169,6 +169,13 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			[task setLaunchPath:@"/usr/bin/open"];
 			[task setArguments:@[@".", @"-a", @"Tower"]];
 			[task launch];
+		} else if([applicationIdentifier isEqualToString:@"com.github.GitHub"]) {
+			// Ditto for the GitHub app
+			NSTask *task = [[NSTask alloc] init];
+			[task setCurrentDirectoryPath:urlToOpen.path];
+			[task setLaunchPath:@"/usr/bin/open"];
+			[task setArguments:@[@".", @"-a", @"GitHub"]];
+			[task launch];
 		} else {
 			[[NSWorkspace sharedWorkspace] openURLs:@[urlToOpen]
 							withAppBundleIdentifier:applicationIdentifier
