@@ -29,7 +29,7 @@
 	<key>LSApplicationCategoryType</key>
 	<string></string>
 	<key>NSPrincipalClass</key>
-	<string>AJKXcodeAdditions</string>
+	<string>AJKOpenWithPlugin</string>
 	<key>XC4Compatible</key>
 	<true/>
 	<key>XCGCReady</key>

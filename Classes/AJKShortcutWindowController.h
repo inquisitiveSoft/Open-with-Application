@@ -1,6 +1,6 @@
 //
-//  AJKAddApplicationWindowController.h
-//  AJKExtendedOpening
+//  AJKShortcutWindowController.h
+//  AJKOpenWithPlugin
 //
 //  Created by Harry Jordan on 24/08/2014.
 //
@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import <ShortcutRecorder/ShortcutRecorder.h>
 
-#import "AJKGlobalDefines.h"
+#import "AJKDefines.h"
 
 
 typedef NS_ENUM(NSInteger, AJKShortcutWindowMode) {

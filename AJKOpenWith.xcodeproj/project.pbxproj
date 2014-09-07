@@ -10,7 +10,7 @@
 		4A0787E019BBA0DF00114ECE /* ShortcutRecorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0787DB19BBA0CA00114ECE /* ShortcutRecorder.framework */; };
 		4A0787E319BBA0E900114ECE /* ShortcutRecorder.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0787DB19BBA0CA00114ECE /* ShortcutRecorder.framework */; };
 		4A27B2F419BBCA2900111F65 /* AJKShortcutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */; };
-		4A56D6191608076A00AFA23C /* AJKExtendedOpening.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A4250641607FB5A00277699 /* AJKExtendedOpening.m */; };
+		4A56D6191608076A00AFA23C /* AJKOpenWithPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A4250641607FB5A00277699 /* AJKOpenWithPlugin.m */; };
 		4A56D61B1608076A00AFA23C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 089C1672FE841209C02AAC07 /* Foundation.framework */; };
 		4A56D61C1608076A00AFA23C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F2EB899145057EA00E97A87 /* AppKit.framework */; };
 		4A64921217CF8F0400DA967A /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A64921117CF8F0400DA967A /* ScriptingBridge.framework */; };
@@ -75,11 +75,11 @@
 		4A0787D419BBA0CA00114ECE /* ShortcutRecorder.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShortcutRecorder.xcodeproj; path = Source/ShortcutRecorder/ShortcutRecorder.xcodeproj; sourceTree = "<group>"; };
 		4A27B2F119BBCA2900111F65 /* AJKShortcutWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKShortcutWindowController.h; sourceTree = "<group>"; };
 		4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKShortcutWindowController.m; sourceTree = "<group>"; };
-		4A4250641607FB5A00277699 /* AJKExtendedOpening.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKExtendedOpening.m; sourceTree = "<group>"; };
-		4A4734DA160B382D00A14793 /* AJKExtendedOpening.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKExtendedOpening.h; sourceTree = "<group>"; };
-		4A56D61F1608076A00AFA23C /* AJKExtendedOpening.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AJKExtendedOpening.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A4250641607FB5A00277699 /* AJKOpenWithPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKOpenWithPlugin.m; sourceTree = "<group>"; };
+		4A4734DA160B382D00A14793 /* AJKOpenWithPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKOpenWithPlugin.h; sourceTree = "<group>"; };
+		4A56D61F1608076A00AFA23C /* AJKOpenWith.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AJKOpenWith.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A64921117CF8F0400DA967A /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = System/Library/Frameworks/ScriptingBridge.framework; sourceTree = SDKROOT; };
-		4AC443F419BC5F5D0041D2E1 /* AJKGlobalDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AJKGlobalDefines.h; sourceTree = "<group>"; };
+		4AC443F419BC5F5D0041D2E1 /* AJKDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AJKDefines.h; sourceTree = "<group>"; };
 		7F2EB899145057EA00E97A87 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -104,6 +104,7 @@
 			children = (
 				7F411B0C15FABAC6002F77B6 /* Classes */,
 				089C167CFE841241C02AAC07 /* Resources */,
+				089C1671FE841209C02AAC07 /* Frameworks and Libraries */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
 			);
 			name = QuietXcode;
@@ -118,7 +119,6 @@
 				4A0787D419BBA0CA00114ECE /* ShortcutRecorder.xcodeproj */,
 			);
 			name = "Frameworks and Libraries";
-			path = ..;
 			sourceTree = "<group>";
 		};
 		089C167CFE841241C02AAC07 /* Resources */ = {
@@ -132,7 +132,7 @@
 		19C28FB8FE9D52D311CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4A56D61F1608076A00AFA23C /* AJKExtendedOpening.xcplugin */,
+				4A56D61F1608076A00AFA23C /* AJKOpenWith.xcplugin */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -150,10 +150,9 @@
 		7F411B0C15FABAC6002F77B6 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				4AC443F419BC5F5D0041D2E1 /* AJKGlobalDefines.h */,
-				089C1671FE841209C02AAC07 /* Frameworks and Libraries */,
-				4A4734DA160B382D00A14793 /* AJKExtendedOpening.h */,
-				4A4250641607FB5A00277699 /* AJKExtendedOpening.m */,
+				4AC443F419BC5F5D0041D2E1 /* AJKDefines.h */,
+				4A4734DA160B382D00A14793 /* AJKOpenWithPlugin.h */,
+				4A4250641607FB5A00277699 /* AJKOpenWithPlugin.m */,
 				4A27B2F119BBCA2900111F65 /* AJKShortcutWindowController.h */,
 				4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */,
 			);
@@ -163,9 +162,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4A56D6171608076A00AFA23C /* AJKExtendedOpening */ = {
+		4A56D6171608076A00AFA23C /* AJKOpenWith */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4A56D61D1608076A00AFA23C /* Build configuration list for PBXNativeTarget "AJKExtendedOpening" */;
+			buildConfigurationList = 4A56D61D1608076A00AFA23C /* Build configuration list for PBXNativeTarget "AJKOpenWith" */;
 			buildPhases = (
 				4A56D6181608076A00AFA23C /* Sources */,
 				4A0787D319BBA0AB00114ECE /* Copy Frameworks */,
@@ -177,10 +176,10 @@
 			dependencies = (
 				4A0787E219BBA0E300114ECE /* PBXTargetDependency */,
 			);
-			name = AJKExtendedOpening;
+			name = AJKOpenWith;
 			productInstallPath = "$(HOME)/Library/Bundles";
 			productName = QuietXcode;
-			productReference = 4A56D61F1608076A00AFA23C /* AJKExtendedOpening.xcplugin */;
+			productReference = 4A56D61F1608076A00AFA23C /* AJKOpenWith.xcplugin */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -191,7 +190,7 @@
 			attributes = {
 				LastUpgradeCheck = 0500;
 			};
-			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "AJKExtendedOpening" */;
+			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "AJKOpenWith" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -211,7 +210,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				4A56D6171608076A00AFA23C /* AJKExtendedOpening */,
+				4A56D6171608076A00AFA23C /* AJKOpenWith */,
 			);
 		};
 /* End PBXProject section */
@@ -245,7 +244,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A56D6191608076A00AFA23C /* AJKExtendedOpening.m in Sources */,
+				4A56D6191608076A00AFA23C /* AJKOpenWithPlugin.m in Sources */,
 				4A27B2F419BBCA2900111F65 /* AJKShortcutWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -294,7 +293,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$HOME/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
-				PRODUCT_NAME = AJKExtendedOpening;
+				PRODUCT_NAME = AJKOpenWith;
 				SDKROOT = macosx10.9;
 				STRIP_INSTALLED_PRODUCT = NO;
 				WRAPPER_EXTENSION = xcplugin;
@@ -304,7 +303,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "AJKExtendedOpening" */ = {
+		1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "AJKOpenWith" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB913F08733D840010E9CD /* Debug */,
@@ -312,7 +311,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		4A56D61D1608076A00AFA23C /* Build configuration list for PBXNativeTarget "AJKExtendedOpening" */ = {
+		4A56D61D1608076A00AFA23C /* Build configuration list for PBXNativeTarget "AJKOpenWith" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A56D61E1608076A00AFA23C /* Debug */,

@@ -1,17 +1,17 @@
 //
-//	AJKExtendedOpening.m
+//	AJKOpenWithPlugin.m
 //	
 //	Created by Harry Jordan on 18/08/12.
 //	Released under the MIT license:	http://opensource.org/licenses/mit-license.php
 //
 
 
-#import "AJKExtendedOpening.h"
+#import "AJKOpenWithPlugin.h"
 
 #import <objc/runtime.h>
 #import <ScriptingBridge/ScriptingBridge.h>
 #import "AJKShortcutWindowController.h"
-#import "AJKGlobalDefines.h"
+#import "AJKDefines.h"
 
 
 NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleIdentifier";
@@ -24,16 +24,16 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 
 
-@interface AJKExtendedOpening () <AJKShortcutWindowControllerDelegate>
+@interface AJKOpenWithPlugin () <AJKShortcutWindowControllerDelegate>
 
 @property (strong) NSMenuItem *openInApplicationMenuItem;
-
 @property (strong) AJKShortcutWindowController *shortcutWindowController;
+@property (strong, nonatomic) NSUserDefaults *userDefaults;
 
 @end
 
 
-@implementation AJKExtendedOpening
+@implementation AJKOpenWithPlugin
 
 
 + (void)pluginDidLoad:(NSBundle *)plugin
@@ -101,7 +101,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			
 			[self updateOpenWithApplicationMenu];
 		} else if([NSApp mainMenu]) {
-			NSLog(@"AJKExtendedOpening Xcode plugin: Couldn't find an 'Open with External Editor' item in the File menu");
+			NSLog(@"AJKOpenWithPlugin Xcode plugin: Couldn't find an 'Open with External Editor' item in the File menu");
 		}
 	}
 
@@ -136,7 +136,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 - (void)openWithDefaultExternalEditor:(id)sender
 {
-	NSString *applicationIdentifier = [[NSUserDefaults standardUserDefaults] objectForKey:AJKExternalEditorBundleIdentifier];
+	NSString *applicationIdentifier = [[self userDefaults] objectForKey:AJKExternalEditorBundleIdentifier];
 	
 	if(!applicationIdentifier) {
 		applicationIdentifier = [self selectExternalEditor:nil];
@@ -159,7 +159,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		}
 	}
 	
-	NSLog(@"AJKExtendedOpening urlToOpen: %@", urlToOpen);
+	NSLog(@"AJKOpenWithPlugin urlToOpen: %@", urlToOpen);
 	if(urlToOpen && [applicationIdentifier length]) {
 		// Handle special cases
 		if([applicationIdentifier isEqualToString:@"com.fournova.Tower2"]) {
@@ -191,7 +191,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 - (NSString *)selectExternalEditor:(id)sender
 {
 	NSString *applicationIdentifier = [self requestApplicationIdentifierForTitle:@"Select Your Prefered External Editor"];
-	[[NSUserDefaults standardUserDefaults] setObject:applicationIdentifier forKey:AJKExternalEditorBundleIdentifier];
+	[[self userDefaults] setObject:applicationIdentifier forKey:AJKExternalEditorBundleIdentifier];
 	return applicationIdentifier;
 }
 
@@ -210,7 +210,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	NSString *projectDirectory = [self projectDirectoryPath];
 	
 	if([projectDirectory length]) {
-		NSString *applicationIdentifier = [[NSUserDefaults standardUserDefaults] objectForKey:AJKPreferedTerminalBundleIdentifier];
+		NSString *applicationIdentifier = [[self userDefaults] objectForKey:AJKPreferedTerminalBundleIdentifier];
 		
 		if(!applicationIdentifier
 			|| [applicationIdentifier compare:@"com.apple.Terminal" options:NSCaseInsensitiveSearch] == NSOrderedSame
@@ -247,7 +247,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 - (void)selectPreferedTerminal:(id)sender
 {
 	NSString *applicationIdentifier = [self requestApplicationIdentifierForTitle:@"Select Your Terminal Emulator of Choice"];
-	[[NSUserDefaults standardUserDefaults] setObject:applicationIdentifier forKey:AJKPreferedTerminalBundleIdentifier];
+	[[self userDefaults] setObject:applicationIdentifier forKey:AJKPreferedTerminalBundleIdentifier];
 }
 
 
@@ -270,7 +270,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	if(applicationIdentifier) {
 		[self openScope:scope inExternalEditorForIdentifier:applicationIdentifier];
 	} else {
-		NSLog(@"AJKExtendedOpening: Couldn't find application identifier for nemu item: %@", menuItem.title);
+		NSLog(@"AJKOpenWithPlugin: Couldn't find application identifier for nemu item: %@", menuItem.title);
 	}
 }
 
@@ -284,7 +284,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	}
 	
 	
-	NSArray *openWithApplications = [[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications];
+	NSArray *openWithApplications = [[self userDefaults] objectForKey:AJKOpenWithApplications];
 	
 	for(NSDictionary *applicationDictionary in openWithApplications) {
 		if([applicationDictionary[AJKApplicationIdentifier] isEqualToString:applicationIdentifier]) {
@@ -323,7 +323,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 {
 	NSMenu *applicationMenu = [[NSMenu alloc] initWithTitle:@""];
 	
-	NSArray *openWithApplications = [[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications];
+	NSArray *openWithApplications = [[self userDefaults] objectForKey:AJKOpenWithApplications];
 	NSInteger numberOfRegisteredApplication = openWithApplications.count;
 	
 	for(NSDictionary *applicationDictionary in openWithApplications) {
@@ -376,7 +376,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 }
 
 
-#pragma mark - AJKCreateShortcutWindowControllerDelegate methods
+#pragma mark - AJKShortcutWindowControllerDelegate methods
 
 
 - (void)addApplicationWithIdentifier:(NSString *)applicationIdentifier scope:(AJKShortcutScope)scope shortcut:(NSDictionary *)shortcut
@@ -384,7 +384,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	// A brute force way to avoid duplicates
 	[self removeApplicationWithIdentifier:applicationIdentifier];
 	
-	NSMutableArray *openWithApplicationsArray = [[[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications] mutableCopy];
+	NSMutableArray *openWithApplicationsArray = [[[self userDefaults] objectForKey:AJKOpenWithApplications] mutableCopy];
 	
 	if(!openWithApplicationsArray) {
 		openWithApplicationsArray = [[NSMutableArray alloc] initWithCapacity:1];
@@ -402,8 +402,8 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		[openWithApplicationsArray addObject:applicationDictionary];
 	}
 	
-	[[NSUserDefaults standardUserDefaults] setObject:openWithApplicationsArray forKey:AJKOpenWithApplications];
-	[[NSUserDefaults standardUserDefaults] synchronize];
+	[[self userDefaults] setObject:openWithApplicationsArray forKey:AJKOpenWithApplications];
+	[[self userDefaults] synchronize];
 }
 
 
@@ -413,15 +413,15 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		return;
 	}
 	
-	NSArray *openWithApplicationsArray = [[NSUserDefaults standardUserDefaults] objectForKey:AJKOpenWithApplications];
+	NSArray *openWithApplicationsArray = [[self userDefaults] objectForKey:AJKOpenWithApplications];
 	NSIndexSet *indexesToKeep = [openWithApplicationsArray indexesOfObjectsPassingTest:^BOOL(NSDictionary *applicationDictionary, NSUInteger idx, BOOL *stop) {
 		return ![applicationDictionary[AJKApplicationIdentifier] isEqualToString:applicationIdentifier];
 	}];
 	
 	if(indexesToKeep.count < openWithApplicationsArray.count) {
 		NSArray *objectsToKeep = [openWithApplicationsArray objectsAtIndexes:indexesToKeep];
-		[[NSUserDefaults standardUserDefaults] setObject:objectsToKeep forKey:AJKOpenWithApplications];
-		[[NSUserDefaults standardUserDefaults] synchronize];
+		[[self userDefaults] setObject:objectsToKeep forKey:AJKOpenWithApplications];
+		[[self userDefaults] synchronize];
 	}
 }
 
@@ -438,6 +438,16 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 
 #pragma mark -
+
+
+- (NSUserDefaults *)userDefaults
+{
+	if(!_userDefaults) {
+		_userDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"com.inquisitiveSoftware.AJKOpenWith"];
+	}
+	
+	return _userDefaults;
+}
 
 
 - (NSURL *)currentFileURL
@@ -476,7 +486,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	}
 	
 	@catch (NSException *exception) {
-		NSLog(@"AJKExtendedOpening Xcode plugin: Raised an exception while looking for the URL of the sourceCodeDocument: %@", exception);
+		NSLog(@"AJKOpenWithPlugin Xcode plugin: Raised an exception while looking for the URL of the sourceCodeDocument: %@", exception);
 	}
 	
 	return nil;
@@ -496,7 +506,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		}
 		
 		@catch (NSException *exception) {
-			NSLog(@"AJKExtendedOpening Xcode plugin: Raised an exception while asking for the documents '_workspace.representingFilePath.relativePathOnVolume' key path: %@", exception);
+			NSLog(@"AJKOpenWithPlugin Xcode plugin: Raised an exception while asking for the documents '_workspace.representingFilePath.relativePathOnVolume' key path: %@", exception);
 		}
 	}
 	

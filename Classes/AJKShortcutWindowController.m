@@ -1,6 +1,6 @@
 //
-//  AJKAddApplicationWindowController.m
-//  AJKExtendedOpening
+//  AJKShortcutWindowController.m
+//  AJKOpenWithPlugin
 //
 //  Created by Harry Jordan on 24/08/2014.
 //
