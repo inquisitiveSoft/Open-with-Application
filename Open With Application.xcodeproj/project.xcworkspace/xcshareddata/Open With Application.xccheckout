@@ -5,12 +5,14 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>82FE63B7-B283-4930-BA17-2A72F423823E</string>
+	<string>9F141397-A454-4D94-9CEF-3647D06D7B44</string>
 	<key>IDESourceControlProjectName</key>
-	<string>AJKOpenWith</string>
+	<string>Open With Application</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>0855D2A9-AA67-47AF-810C-B0470B8F2C98</key>
+		<key>0A4E3C69-5731-4864-96D5-76B50DEB0226</key>
+		<string>https://github.com/Kentzo/ShortcutRecorder</string>
+		<key>34D12E54-E471-4BA4-A624-F875EF5F05B4</key>
 		<string>ssh://github.com/inquisitiveSoft/Open-with-Application.git</string>
 		<key>97641889692A69A4B270231FB25F4B84FB93CA0B</key>
 		<string>https://github.com/Kentzo/ShortcutRecorder</string>
@@ -18,13 +20,15 @@
 		<string>github.com:inquisitiveSoft/Open-with-Application.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>AJKOpenWith.xcodeproj</string>
+	<string>Open With Application.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>0855D2A9-AA67-47AF-810C-B0470B8F2C98</key>
+		<key>0A4E3C69-5731-4864-96D5-76B50DEB0226</key>
+		<string>../../../AJKExtendedOpening/Source/ShortcutRecorder</string>
+		<key>34D12E54-E471-4BA4-A624-F875EF5F05B4</key>
 		<string>../../../AJKExtendedOpening</string>
 		<key>97641889692A69A4B270231FB25F4B84FB93CA0B</key>
-		<string>../..Source/ShortcutRecorder/</string>
+		<string>../..Source/ShortcutRecorder</string>
 		<key>AE0ACCAE32FF9E4BC8FE99A97EE17B869B8A383D</key>
 		<string>../..</string>
 	</dict>
@@ -40,7 +44,7 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>0855D2A9-AA67-47AF-810C-B0470B8F2C98</string>
+			<string>34D12E54-E471-4BA4-A624-F875EF5F05B4</string>
 			<key>IDESourceControlWCCName</key>
 			<string>AJKExtendedOpening</string>
 		</dict>
@@ -51,6 +55,14 @@
 			<string>AE0ACCAE32FF9E4BC8FE99A97EE17B869B8A383D</string>
 			<key>IDESourceControlWCCName</key>
 			<string>Open%20With%20Application</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>0A4E3C69-5731-4864-96D5-76B50DEB0226</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ShortcutRecorder</string>
 		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
