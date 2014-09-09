@@ -115,7 +115,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
-	if([menuItem action] == @selector(openWithExternalEditor:)) {
+	if([menuItem action] == @selector(openWithDefaultExternalEditor:)) {
 		return [[self currentFileURL] isFileURL];
 	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
 		return [[self projectDirectoryPath] length] > 0;
@@ -235,7 +235,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			}
 			
 			@catch (NSException *exception) {
-				NSLog(@"AJKExtendeddOpening: Encountered an exception while launching iTerm: %@", exception);
+				NSLog(@"Open With Application: Encountered an exception while launching iTerm: %@", exception);
 			}
 		} else {
 			NSLog(@"Unrecognized terminal emulator: '%@'", applicationIdentifier);
