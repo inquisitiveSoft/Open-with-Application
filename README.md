@@ -1,4 +1,4 @@
-![File menu screenshot](Menu-screenshot.jpg)
+![File menu screenshot](Screenshots/Menu-screenshot.jpg)
 
 # About Open with Application
 Open with… is a simple plugin for Xcode that makes it easy to open the current project or the focused file either in the Finder or the Terminal, or any other application of your choice. You can also assign custom keyboard shortcuts.
@@ -8,7 +8,7 @@ Holding down the Control key while entering the menu will allow you to choose th
 ---------------------------------
 
 
-![Create Shortcut Screenshot](Create-shortcut-screenshot.jpg)
+![Create Shortcut Screenshot](Screenshots/Create-shortcut-screenshot.jpg)
 
 
 # Installation
