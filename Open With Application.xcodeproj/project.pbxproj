@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		4A27B2F419BBCA2900111F65 /* AJKShortcutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */; };
+		4A4894FA19C0CE7B00B31B84 /* ShortcutRecorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A4894F919C0CE7B00B31B84 /* ShortcutRecorder.framework */; };
+		4A4894FB19C0CEAA00B31B84 /* ShortcutRecorder.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4A4894F919C0CE7B00B31B84 /* ShortcutRecorder.framework */; };
 		4A56D6191608076A00AFA23C /* AJKOpenWithPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A4250641607FB5A00277699 /* AJKOpenWithPlugin.m */; };
 		4A56D61B1608076A00AFA23C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 089C1672FE841209C02AAC07 /* Foundation.framework */; };
 		4A56D61C1608076A00AFA23C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F2EB899145057EA00E97A87 /* AppKit.framework */; };
@@ -30,6 +32,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				4A4894FB19C0CEAA00B31B84 /* ShortcutRecorder.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -42,6 +45,7 @@
 		4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKShortcutWindowController.m; sourceTree = "<group>"; };
 		4A4250641607FB5A00277699 /* AJKOpenWithPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKOpenWithPlugin.m; sourceTree = "<group>"; };
 		4A4734DA160B382D00A14793 /* AJKOpenWithPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKOpenWithPlugin.h; sourceTree = "<group>"; };
+		4A4894F919C0CE7B00B31B84 /* ShortcutRecorder.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ShortcutRecorder.framework; path = Source/ShortcutRecorder.framework; sourceTree = "<group>"; };
 		4A56D61F1608076A00AFA23C /* Open With Application.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Open With Application.xcplugin"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A64921117CF8F0400DA967A /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = System/Library/Frameworks/ScriptingBridge.framework; sourceTree = SDKROOT; };
 		4AC443F419BC5F5D0041D2E1 /* AJKDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AJKDefines.h; sourceTree = "<group>"; };
@@ -54,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A4894FA19C0CE7B00B31B84 /* ShortcutRecorder.framework in Frameworks */,
 				4A64921217CF8F0400DA967A /* ScriptingBridge.framework in Frameworks */,
 				4A56D61B1608076A00AFA23C /* Foundation.framework in Frameworks */,
 				4A56D61C1608076A00AFA23C /* AppKit.framework in Frameworks */,
@@ -80,6 +85,7 @@
 				7F2EB899145057EA00E97A87 /* AppKit.framework */,
 				089C1672FE841209C02AAC07 /* Foundation.framework */,
 				4A64921117CF8F0400DA967A /* ScriptingBridge.framework */,
+				4A4894F919C0CE7B00B31B84 /* ShortcutRecorder.framework */,
 			);
 			name = "Frameworks and Libraries";
 			sourceTree = "<group>";
@@ -120,9 +126,9 @@
 			buildConfigurationList = 4A56D61D1608076A00AFA23C /* Build configuration list for PBXNativeTarget "Open With Application" */;
 			buildPhases = (
 				4A56D6181608076A00AFA23C /* Sources */,
-				4A0787D319BBA0AB00114ECE /* Copy Frameworks */,
 				4A0787D019BB9F9000114ECE /* CopyFiles */,
 				4A56D61A1608076A00AFA23C /* Frameworks */,
+				4A0787D319BBA0AB00114ECE /* Copy Frameworks */,
 			);
 			buildRules = (
 			);
@@ -200,7 +206,7 @@
 				DEPLOYMENT_LOCATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DSTROOT = "$(HOME)";
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Source";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
