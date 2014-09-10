@@ -7,44 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A337E3119C0BF1200B684F9 /* ShortcutRecorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A337E3019C0BF1200B684F9 /* ShortcutRecorder.framework */; };
+		4A337E3219C0BF2500B684F9 /* ShortcutRecorder.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4A337E3019C0BF1200B684F9 /* ShortcutRecorder.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4A6F0BBD19BF61DF00E1C5FF /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A6F0BBC19BF61DF00E1C5FF /* Cocoa.framework */; };
 		4A6F0BC719BF61DF00E1C5FF /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A6F0BC519BF61DF00E1C5FF /* InfoPlist.strings */; };
-		4A6F0BDE19BF62C200E1C5FF /* ShortcutRecorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A6F0BD719BF62B300E1C5FF /* ShortcutRecorder.framework */; };
-		4A6F0BE019BF62D600E1C5FF /* ShortcutRecorder.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4A6F0BD719BF62B300E1C5FF /* ShortcutRecorder.framework */; };
 		4A6F0BE619BF62E900E1C5FF /* AJKOpenWithPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A6F0BE319BF62E900E1C5FF /* AJKOpenWithPlugin.m */; };
 		4A6F0BE719BF62E900E1C5FF /* AJKShortcutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A6F0BE519BF62E900E1C5FF /* AJKShortcutWindowController.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		4A6F0BD619BF62B300E1C5FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4A6F0BD019BF62B300E1C5FF /* ShortcutRecorder.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 939837800DA42965007F53F3;
-			remoteInfo = ShortcutRecorder.framework;
-		};
-		4A6F0BD819BF62B300E1C5FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4A6F0BD019BF62B300E1C5FF /* ShortcutRecorder.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E273122E1349EC9000A84433;
-			remoteInfo = PTHotKey.framework;
-		};
-		4A6F0BDA19BF62B300E1C5FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4A6F0BD019BF62B300E1C5FF /* ShortcutRecorder.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0D6B2468180304DE00CE1142;
-			remoteInfo = Demo;
-		};
-		4A6F0BDC19BF62BE00E1C5FF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4A6F0BD019BF62B300E1C5FF /* ShortcutRecorder.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 9398377F0DA42965007F53F3;
-			remoteInfo = ShortcutRecorder.framework;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		4A6F0BDF19BF62C800E1C5FF /* Copy Frameworks */ = {
@@ -53,7 +22,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				4A6F0BE019BF62D600E1C5FF /* ShortcutRecorder.framework in Copy Frameworks */,
+				4A337E3219C0BF2500B684F9 /* ShortcutRecorder.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -61,6 +30,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4A337E3019C0BF1200B684F9 /* ShortcutRecorder.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ShortcutRecorder.framework; path = Source/ShortcutRecorder.framework; sourceTree = "<group>"; };
 		4A6F0BB919BF61DF00E1C5FF /* Open With Application.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Open With Application.xcplugin"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A6F0BBC19BF61DF00E1C5FF /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A6F0BBF19BF61DF00E1C5FF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -69,7 +39,6 @@
 		4A6F0BC419BF61DF00E1C5FF /* Open With Application-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Open With Application-Info.plist"; sourceTree = "<group>"; };
 		4A6F0BC619BF61DF00E1C5FF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		4A6F0BC819BF61DF00E1C5FF /* Open With Application-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Open With Application-Prefix.pch"; sourceTree = "<group>"; };
-		4A6F0BD019BF62B300E1C5FF /* ShortcutRecorder.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShortcutRecorder.xcodeproj; path = Source/ShortcutRecorder/ShortcutRecorder.xcodeproj; sourceTree = "<group>"; };
 		4A6F0BE119BF62E900E1C5FF /* AJKDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKDefines.h; sourceTree = "<group>"; };
 		4A6F0BE219BF62E900E1C5FF /* AJKOpenWithPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKOpenWithPlugin.h; sourceTree = "<group>"; };
 		4A6F0BE319BF62E900E1C5FF /* AJKOpenWithPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKOpenWithPlugin.m; sourceTree = "<group>"; };
@@ -82,8 +51,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A6F0BDE19BF62C200E1C5FF /* ShortcutRecorder.framework in Frameworks */,
 				4A6F0BBD19BF61DF00E1C5FF /* Cocoa.framework in Frameworks */,
+				4A337E3119C0BF1200B684F9 /* ShortcutRecorder.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,8 +79,8 @@
 		4A6F0BBB19BF61DF00E1C5FF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4A337E3019C0BF1200B684F9 /* ShortcutRecorder.framework */,
 				4A6F0BBC19BF61DF00E1C5FF /* Cocoa.framework */,
-				4A6F0BD019BF62B300E1C5FF /* ShortcutRecorder.xcodeproj */,
 				4A6F0BBE19BF61DF00E1C5FF /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -150,16 +119,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		4A6F0BD119BF62B300E1C5FF /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				4A6F0BD719BF62B300E1C5FF /* ShortcutRecorder.framework */,
-				4A6F0BD919BF62B300E1C5FF /* PTHotKey.framework */,
-				4A6F0BDB19BF62B300E1C5FF /* Demo.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -175,7 +134,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				4A6F0BDD19BF62BE00E1C5FF /* PBXTargetDependency */,
 			);
 			name = "Open With Application";
 			productName = "Open With Application";
@@ -201,42 +159,12 @@
 			mainGroup = 4A6F0BB019BF61DF00E1C5FF;
 			productRefGroup = 4A6F0BBA19BF61DF00E1C5FF /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 4A6F0BD119BF62B300E1C5FF /* Products */;
-					ProjectRef = 4A6F0BD019BF62B300E1C5FF /* ShortcutRecorder.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				4A6F0BB819BF61DF00E1C5FF /* Open With Application */,
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		4A6F0BD719BF62B300E1C5FF /* ShortcutRecorder.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = ShortcutRecorder.framework;
-			remoteRef = 4A6F0BD619BF62B300E1C5FF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4A6F0BD919BF62B300E1C5FF /* PTHotKey.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = PTHotKey.framework;
-			remoteRef = 4A6F0BD819BF62B300E1C5FF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4A6F0BDB19BF62B300E1C5FF /* Demo.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = Demo.app;
-			remoteRef = 4A6F0BDA19BF62B300E1C5FF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		4A6F0BB719BF61DF00E1C5FF /* Resources */ = {
@@ -260,14 +188,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		4A6F0BDD19BF62BE00E1C5FF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = ShortcutRecorder.framework;
-			targetProxy = 4A6F0BDC19BF62BE00E1C5FF /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		4A6F0BC519BF61DF00E1C5FF /* InfoPlist.strings */ = {
@@ -298,6 +218,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Source";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -313,9 +234,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Applications/Xcode6-Beta7.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "\"$(BUILT_PRODUCTS_DIR)/../Source";
 			};
 			name = Debug;
 		};
@@ -338,6 +264,7 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Source";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -346,8 +273,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Applications/Xcode6-Beta7.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+					"\"$(BUILT_PRODUCTS_DIR)/../../Source\"",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "\"$(BUILT_PRODUCTS_DIR)/../Source";
 			};
 			name = Release;
 		};
@@ -357,11 +290,13 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = "$(HOME)";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Source/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Open With Application/Open With Application-Prefix.pch";
 				INFOPLIST_FILE = "Open With Application/Open With Application-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Application Support/Developer/Shared/Xcode/Plug-ins";
 				PRODUCT_NAME = "Open With Application";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Source/**";
 				WRAPPER_EXTENSION = xcplugin;
 			};
 			name = Debug;
@@ -372,11 +307,13 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = "$(HOME)";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Source/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Open With Application/Open With Application-Prefix.pch";
 				INFOPLIST_FILE = "Open With Application/Open With Application-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Application Support/Developer/Shared/Xcode/Plug-ins";
 				PRODUCT_NAME = "Open With Application";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/Source/**";
 				WRAPPER_EXTENSION = xcplugin;
 			};
 			name = Release;
