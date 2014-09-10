@@ -61,14 +61,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4A6F0BB919BF61DF00E1C5FF /* OpenWith.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenWith.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A6F0BB919BF61DF00E1C5FF /* Open With Application.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Open With Application.xcplugin"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A6F0BBC19BF61DF00E1C5FF /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A6F0BBF19BF61DF00E1C5FF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		4A6F0BC019BF61DF00E1C5FF /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		4A6F0BC119BF61DF00E1C5FF /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
-		4A6F0BC419BF61DF00E1C5FF /* OpenWith-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OpenWith-Info.plist"; sourceTree = "<group>"; };
+		4A6F0BC419BF61DF00E1C5FF /* Open With Application-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Open With Application-Info.plist"; sourceTree = "<group>"; };
 		4A6F0BC619BF61DF00E1C5FF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		4A6F0BC819BF61DF00E1C5FF /* OpenWith-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OpenWith-Prefix.pch"; sourceTree = "<group>"; };
+		4A6F0BC819BF61DF00E1C5FF /* Open With Application-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Open With Application-Prefix.pch"; sourceTree = "<group>"; };
 		4A6F0BD019BF62B300E1C5FF /* ShortcutRecorder.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ShortcutRecorder.xcodeproj; path = Source/ShortcutRecorder/ShortcutRecorder.xcodeproj; sourceTree = "<group>"; };
 		4A6F0BE119BF62E900E1C5FF /* AJKDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKDefines.h; sourceTree = "<group>"; };
 		4A6F0BE219BF62E900E1C5FF /* AJKOpenWithPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKOpenWithPlugin.h; sourceTree = "<group>"; };
@@ -102,7 +102,7 @@
 		4A6F0BBA19BF61DF00E1C5FF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4A6F0BB919BF61DF00E1C5FF /* OpenWith.xcplugin */,
+				4A6F0BB919BF61DF00E1C5FF /* Open With Application.xcplugin */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -143,9 +143,9 @@
 		4A6F0BC319BF61DF00E1C5FF /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				4A6F0BC419BF61DF00E1C5FF /* OpenWith-Info.plist */,
+				4A6F0BC419BF61DF00E1C5FF /* Open With Application-Info.plist */,
 				4A6F0BC519BF61DF00E1C5FF /* InfoPlist.strings */,
-				4A6F0BC819BF61DF00E1C5FF /* OpenWith-Prefix.pch */,
+				4A6F0BC819BF61DF00E1C5FF /* Open With Application-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -163,9 +163,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4A6F0BB819BF61DF00E1C5FF /* OpenWith */ = {
+		4A6F0BB819BF61DF00E1C5FF /* Open With Application */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4A6F0BCB19BF61DF00E1C5FF /* Build configuration list for PBXNativeTarget "OpenWith" */;
+			buildConfigurationList = 4A6F0BCB19BF61DF00E1C5FF /* Build configuration list for PBXNativeTarget "Open With Application" */;
 			buildPhases = (
 				4A6F0BB519BF61DF00E1C5FF /* Sources */,
 				4A6F0BB619BF61DF00E1C5FF /* Frameworks */,
@@ -177,9 +177,9 @@
 			dependencies = (
 				4A6F0BDD19BF62BE00E1C5FF /* PBXTargetDependency */,
 			);
-			name = OpenWith;
+			name = "Open With Application";
 			productName = "Open With Application";
-			productReference = 4A6F0BB919BF61DF00E1C5FF /* OpenWith.xcplugin */;
+			productReference = 4A6F0BB919BF61DF00E1C5FF /* Open With Application.xcplugin */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -191,7 +191,7 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = InquisitiveSoftware;
 			};
-			buildConfigurationList = 4A6F0BB419BF61DF00E1C5FF /* Build configuration list for PBXProject "OpenWith" */;
+			buildConfigurationList = 4A6F0BB419BF61DF00E1C5FF /* Build configuration list for PBXProject "Open With Application" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -209,7 +209,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				4A6F0BB819BF61DF00E1C5FF /* OpenWith */,
+				4A6F0BB819BF61DF00E1C5FF /* Open With Application */,
 			);
 		};
 /* End PBXProject section */
@@ -358,10 +358,10 @@
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = "$(HOME)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Open With Application/OpenWith-Prefix.pch";
-				INFOPLIST_FILE = "Open With Application/OpenWith-Info.plist";
+				GCC_PREFIX_HEADER = "Open With Application/Open With Application-Prefix.pch";
+				INFOPLIST_FILE = "Open With Application/Open With Application-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Application Support/Developer/Shared/Xcode/Plug-ins";
-				PRODUCT_NAME = OpenWith;
+				PRODUCT_NAME = "Open With Application";
 				WRAPPER_EXTENSION = xcplugin;
 			};
 			name = Debug;
@@ -373,10 +373,10 @@
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = "$(HOME)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Open With Application/OpenWith-Prefix.pch";
-				INFOPLIST_FILE = "Open With Application/OpenWith-Info.plist";
+				GCC_PREFIX_HEADER = "Open With Application/Open With Application-Prefix.pch";
+				INFOPLIST_FILE = "Open With Application/Open With Application-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Application Support/Developer/Shared/Xcode/Plug-ins";
-				PRODUCT_NAME = OpenWith;
+				PRODUCT_NAME = "Open With Application";
 				WRAPPER_EXTENSION = xcplugin;
 			};
 			name = Release;
@@ -384,7 +384,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4A6F0BB419BF61DF00E1C5FF /* Build configuration list for PBXProject "OpenWith" */ = {
+		4A6F0BB419BF61DF00E1C5FF /* Build configuration list for PBXProject "Open With Application" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A6F0BC919BF61DF00E1C5FF /* Debug */,
@@ -393,7 +393,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4A6F0BCB19BF61DF00E1C5FF /* Build configuration list for PBXNativeTarget "OpenWith" */ = {
+		4A6F0BCB19BF61DF00E1C5FF /* Build configuration list for PBXNativeTarget "Open With Application" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A6F0BCC19BF61DF00E1C5FF /* Debug */,

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>73E0BD45-650F-437A-8034-F424C17B821D</string>
+	<key>IDESourceControlProjectName</key>
+	<string>OpenWith</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>852B5561-D3FF-4228-A5F2-32B84C644D19</key>
+		<string>https://github.com/Kentzo/ShortcutRecorder</string>
+		<key>A31724D9-0CC9-4398-A85D-D6915D44FC19</key>
+		<string>ssh://github.com/inquisitiveSoft/Open-with-Application.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>OpenWith.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>852B5561-D3FF-4228-A5F2-32B84C644D19</key>
+		<string>../../Source/ShortcutRecorder</string>
+		<key>A31724D9-0CC9-4398-A85D-D6915D44FC19</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>ssh://github.com/inquisitiveSoft/Open-with-Application.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>A31724D9-0CC9-4398-A85D-D6915D44FC19</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>A31724D9-0CC9-4398-A85D-D6915D44FC19</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Open With Application</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>852B5561-D3FF-4228-A5F2-32B84C644D19</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ShortcutRecorder</string>
+		</dict>
+	</array>
+</dict>
+</plist>
