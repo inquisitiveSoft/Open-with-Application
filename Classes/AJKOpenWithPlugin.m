@@ -12,6 +12,7 @@
 #import <ScriptingBridge/ScriptingBridge.h>
 #import "AJKShortcutWindowController.h"
 #import "AJKDefines.h"
+#import "LogClient.h"
 
 
 NSString * const AJKExternalEditorBundleIdentifier = @"AJKExternalEditorBundleIdentifier";
@@ -38,10 +39,10 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 + (void)pluginDidLoad:(NSBundle *)plugin
 {
-	static id __xcodeAdditionsPlugin = nil;
+	static id __openWithAdditionsPlugin = nil;
 	static dispatch_once_t createXcodeAdditionsPlugin;
 	dispatch_once(&createXcodeAdditionsPlugin, ^{
-		__xcodeAdditionsPlugin = [[self alloc] init];
+		__openWithAdditionsPlugin = [[self alloc] init];
 	});
 }
 
@@ -101,7 +102,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			
 			[self updateOpenWithApplicationMenu];
 		} else if([NSApp mainMenu]) {
-			NSLog(@"AJKOpenWithPlugin Xcode plugin: Couldn't find an 'Open with External Editor' item in the File menu");
+			PluginLog(@"AJKOpenWithPlugin Xcode plugin: Couldn't find an 'Open with External Editor' item in the File menu");
 		}
 	}
 
@@ -118,12 +119,12 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	if([menuItem action] == @selector(openWithExternalEditor:)) {
 		return [[self currentFileURL] isFileURL];
 	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
-		return [[self projectDirectoryPath] length] > 0;
+		return (BOOL)[self projectDirectoryURL];
 	} else if([menuItem action] == @selector(openApplicationForMenuItem:)) {
 		if(menuItem.tag == AJKShortcutScopeDocument) {
 			return [[self currentFileURL] isFileURL];
 		} else {
-			return [[self projectDirectoryPath] length] > 0;
+			return (BOOL)[self projectDirectoryURL];
 		}
 	}
 	
@@ -151,37 +152,40 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	NSURL *urlToOpen = [self currentFileURL];
 	
 	if(scope == AJKShortcutScopeProject) {
-		NSString *projectDirectory = [self projectDirectoryPath];
-		NSURL *projectURL = [NSURL URLWithString:projectDirectory];
-		
-		if(projectURL) {
-			urlToOpen = projectURL;
-		}
+		urlToOpen = [self projectDirectoryURL];
+		PluginLog(@"AJKOpenWithPlugin Xcode plugin: projectDirectory: %@", urlToOpen);
 	}
 	
-	NSLog(@"AJKOpenWithPlugin urlToOpen: %@", urlToOpen);
+	PluginLog(@"AJKOpenWithPlugin Xcode plugin: scope: %ld", scope);
+	
 	if(urlToOpen && [applicationIdentifier length]) {
 		// Handle special cases
-		if([applicationIdentifier isEqualToString:@"com.fournova.Tower2"]) {
-			// Tower (at least the second version) doesn't seem to handle NSWorkspace…openURLs
-			NSTask *task = [[NSTask alloc] init];
-			[task setCurrentDirectoryPath:urlToOpen.path];
-			[task setLaunchPath:@"/usr/bin/open"];
-			[task setArguments:@[@".", @"-a", @"Tower"]];
-			[task launch];
-		} else if([applicationIdentifier isEqualToString:@"com.github.GitHub"]) {
-			// Ditto for the GitHub app
-			NSTask *task = [[NSTask alloc] init];
-			[task setCurrentDirectoryPath:urlToOpen.path];
-			[task setLaunchPath:@"/usr/bin/open"];
-			[task setArguments:@[@".", @"-a", @"GitHub"]];
-			[task launch];
-		} else {
-			[[NSWorkspace sharedWorkspace] openURLs:@[urlToOpen]
-							withAppBundleIdentifier:applicationIdentifier
-											options:NSWorkspaceLaunchDefault
-					 additionalEventParamDescriptor:nil
-								  launchIdentifiers:nil];
+		@try {
+			if([applicationIdentifier isEqualToString:@"com.fournova.Tower2"]) {
+				// Tower (at least the second version) doesn't seem to handle NSWorkspace…openURLs in the way that you'd hope
+				NSTask *task = [[NSTask alloc] init];
+				[task setCurrentDirectoryPath:urlToOpen.path];
+				[task setLaunchPath:@"/usr/bin/open"];
+				[task setArguments:@[@".", @"-a", @"Tower"]];
+				[task launch];
+			} else if([applicationIdentifier isEqualToString:@"com.github.GitHub"]) {
+				// Ditto for the GitHub app
+				NSTask *task = [[NSTask alloc] init];
+				[task setCurrentDirectoryPath:urlToOpen.path];
+				[task setLaunchPath:@"/usr/bin/open"];
+				[task setArguments:@[@".", @"-a", @"GitHub"]];
+				[task launch];
+			} else {
+				[[NSWorkspace sharedWorkspace] openURLs:@[urlToOpen]
+								withAppBundleIdentifier:applicationIdentifier
+												options:NSWorkspaceLaunchDefault
+						 additionalEventParamDescriptor:nil
+									  launchIdentifiers:nil];
+			}
+		}
+		
+		@catch (NSException *exception) {
+			PluginLog(@"AJKOpenWithPlugin Xcode plugin: encountered an exception: %@ in openScope:%ld inExternalEditorForIdentifier:%@", exception, scope, applicationIdentifier);
 		}
 	}
 }
@@ -198,16 +202,17 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 - (void)showProjectInFinder:(id)sender
 {
-	NSString *projectDirectory = [self projectDirectoryPath];
+	NSURL *projectDirectoryURL = [self projectDirectoryURL];
 	
-	if([projectDirectory length])
-		[[NSWorkspace sharedWorkspace] openFile:projectDirectory];
+	if(projectDirectoryURL) {
+		[[NSWorkspace sharedWorkspace] openURL:projectDirectoryURL];
+	}
 }
 
 
 - (void)openProjectInTerminal:(id)sender
 {
-	NSString *projectDirectory = [self projectDirectoryPath];
+	NSString *projectDirectory = [self projectDirectoryURL].path;
 	
 	if([projectDirectory length]) {
 		NSString *applicationIdentifier = [[self userDefaults] objectForKey:AJKPreferedTerminalBundleIdentifier];
@@ -235,10 +240,10 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			}
 			
 			@catch (NSException *exception) {
-				NSLog(@"AJKExtendeddOpening: Encountered an exception while launching iTerm: %@", exception);
+				PluginLog(@"AJKExtendeddOpening: Encountered an exception while launching iTerm: %@", exception);
 			}
 		} else {
-			NSLog(@"Unrecognized terminal emulator: '%@'", applicationIdentifier);
+			PluginLog(@"Unrecognized terminal emulator: '%@'", applicationIdentifier);
 		}
 	}
 }
@@ -270,7 +275,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	if(applicationIdentifier) {
 		[self openScope:scope inExternalEditorForIdentifier:applicationIdentifier];
 	} else {
-		NSLog(@"AJKOpenWithPlugin: Couldn't find application identifier for nemu item: %@", menuItem.title);
+		PluginLog(@"AJKOpenWithPlugin: Couldn't find application identifier for nemu item: %@", menuItem.title);
 	}
 }
 
@@ -486,14 +491,14 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	}
 	
 	@catch (NSException *exception) {
-		NSLog(@"AJKOpenWithPlugin Xcode plugin: Raised an exception while looking for the URL of the sourceCodeDocument: %@", exception);
+		PluginLog(@"AJKOpenWithPlugin Xcode plugin: Raised an exception while looking for the URL of the sourceCodeDocument: %@", exception);
 	}
 	
 	return nil;
 }
 
 
-- (NSString *)projectDirectoryPath
+- (NSURL *)projectDirectoryURL
 {
 	for (NSDocument *document in [NSApp orderedDocuments]) {
 		@try {
@@ -501,12 +506,12 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			NSURL *workspaceDirectoryURL = [[[document valueForKeyPath:@"_workspace.representingFilePath.fileURL"] URLByDeletingLastPathComponent] filePathURL];
 			
 			if(workspaceDirectoryURL) {
-				return [workspaceDirectoryURL path];
+				return workspaceDirectoryURL;
 			}
 		}
 		
 		@catch (NSException *exception) {
-			NSLog(@"AJKOpenWithPlugin Xcode plugin: Raised an exception while asking for the documents '_workspace.representingFilePath.relativePathOnVolume' key path: %@", exception);
+			PluginLog(@"AJKOpenWithPlugin Xcode plugin: Raised an exception while asking for the documents '_workspace.representingFilePath.relativePathOnVolume' key path: %@", exception);
 		}
 	}
 	
@@ -563,13 +568,13 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 - (void)printAllMethodsForObject:(id)objectToInspect
 {
-	NSLog(@"%@", objectToInspect);
+	PluginLog(@"%@", objectToInspect);
 	
 	int unsigned numberOfMethods;
 	Method *methods = class_copyMethodList([objectToInspect class], &numberOfMethods);
 	
 	for(int i = 0; i < numberOfMethods; i++) {
-		NSLog(@"%@: %@", NSStringFromClass([objectToInspect class]), NSStringFromSelector(method_getName(methods[i])));
+		PluginLog(@"%@: %@", NSStringFromClass([objectToInspect class]), NSStringFromSelector(method_getName(methods[i])));
 	}
 }
 

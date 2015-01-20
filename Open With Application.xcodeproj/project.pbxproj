@@ -8,12 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		4A27B2F419BBCA2900111F65 /* AJKShortcutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */; };
-		4A4894FA19C0CE7B00B31B84 /* ShortcutRecorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A4894F919C0CE7B00B31B84 /* ShortcutRecorder.framework */; };
-		4A4894FB19C0CEAA00B31B84 /* ShortcutRecorder.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4A4894F919C0CE7B00B31B84 /* ShortcutRecorder.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		4A56D6191608076A00AFA23C /* AJKOpenWithPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A4250641607FB5A00277699 /* AJKOpenWithPlugin.m */; };
 		4A56D61B1608076A00AFA23C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 089C1672FE841209C02AAC07 /* Foundation.framework */; };
 		4A5CEEA619C11E2200382A77 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A5CEEA419C11DFD00382A77 /* AppKit.framework */; };
 		4A5CEEA719C11E2600382A77 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A5CEEA219C11DF300382A77 /* ScriptingBridge.framework */; };
+		4AF54D2D1A6EA186005ACBB2 /* ShortcutRecorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AF54D2C1A6EA186005ACBB2 /* ShortcutRecorder.framework */; };
+		4AF54D301A6EA20A005ACBB2 /* LogClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 4AF54D2F1A6EA20A005ACBB2 /* LogClient.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,7 +32,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				4A4894FB19C0CEAA00B31B84 /* ShortcutRecorder.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -45,11 +44,13 @@
 		4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKShortcutWindowController.m; sourceTree = "<group>"; };
 		4A4250641607FB5A00277699 /* AJKOpenWithPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKOpenWithPlugin.m; sourceTree = "<group>"; };
 		4A4734DA160B382D00A14793 /* AJKOpenWithPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKOpenWithPlugin.h; sourceTree = "<group>"; };
-		4A4894F919C0CE7B00B31B84 /* ShortcutRecorder.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ShortcutRecorder.framework; path = Source/ShortcutRecorder.framework; sourceTree = "<group>"; };
 		4A56D61F1608076A00AFA23C /* Open With Application.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Open With Application.xcplugin"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A5CEEA219C11DF300382A77 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/Frameworks/ScriptingBridge.framework; sourceTree = DEVELOPER_DIR; };
 		4A5CEEA419C11DFD00382A77 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/Frameworks/AppKit.framework; sourceTree = DEVELOPER_DIR; };
 		4AC443F419BC5F5D0041D2E1 /* AJKDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AJKDefines.h; sourceTree = "<group>"; };
+		4AF54D2C1A6EA186005ACBB2 /* ShortcutRecorder.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ShortcutRecorder.framework; path = Sources/ShortcutRecorder.framework; sourceTree = "<group>"; };
+		4AF54D2E1A6EA20A005ACBB2 /* LogClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LogClient.h; path = Sources/PluginConsole/PluginConsole/PluginConsole/Client/LogClient.h; sourceTree = "<group>"; };
+		4AF54D2F1A6EA20A005ACBB2 /* LogClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LogClient.m; path = Sources/PluginConsole/PluginConsole/PluginConsole/Client/LogClient.m; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -59,9 +60,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A5CEEA619C11E2200382A77 /* AppKit.framework in Frameworks */,
+				4AF54D2D1A6EA186005ACBB2 /* ShortcutRecorder.framework in Frameworks */,
 				4A56D61B1608076A00AFA23C /* Foundation.framework in Frameworks */,
 				4A5CEEA719C11E2600382A77 /* ScriptingBridge.framework in Frameworks */,
-				4A4894FA19C0CE7B00B31B84 /* ShortcutRecorder.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +73,7 @@
 			isa = PBXGroup;
 			children = (
 				7F411B0C15FABAC6002F77B6 /* Classes */,
+				4AF54D311A6EA20D005ACBB2 /* Other Sources */,
 				089C167CFE841241C02AAC07 /* Resources */,
 				089C1671FE841209C02AAC07 /* Frameworks and Libraries */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
@@ -85,7 +87,7 @@
 				4A5CEEA419C11DFD00382A77 /* AppKit.framework */,
 				4A5CEEA219C11DF300382A77 /* ScriptingBridge.framework */,
 				089C1672FE841209C02AAC07 /* Foundation.framework */,
-				4A4894F919C0CE7B00B31B84 /* ShortcutRecorder.framework */,
+				4AF54D2C1A6EA186005ACBB2 /* ShortcutRecorder.framework */,
 			);
 			name = "Frameworks and Libraries";
 			sourceTree = "<group>";
@@ -104,6 +106,23 @@
 				4A56D61F1608076A00AFA23C /* Open With Application.xcplugin */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		4A2E145E1A6EAA1100A46A70 /* PluginConsole */ = {
+			isa = PBXGroup;
+			children = (
+				4AF54D2E1A6EA20A005ACBB2 /* LogClient.h */,
+				4AF54D2F1A6EA20A005ACBB2 /* LogClient.m */,
+			);
+			name = PluginConsole;
+			sourceTree = "<group>";
+		};
+		4AF54D311A6EA20D005ACBB2 /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				4A2E145E1A6EAA1100A46A70 /* PluginConsole */,
+			);
+			name = "Other Sources";
 			sourceTree = "<group>";
 		};
 		7F411B0C15FABAC6002F77B6 /* Classes */ = {
@@ -174,6 +193,7 @@
 			files = (
 				4A56D6191608076A00AFA23C /* AJKOpenWithPlugin.m in Sources */,
 				4A27B2F419BBCA2900111F65 /* AJKShortcutWindowController.m in Sources */,
+				4AF54D301A6EA20A005ACBB2 /* LogClient.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -206,7 +226,10 @@
 				DEPLOYMENT_LOCATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DSTROOT = "$(HOME)";
-				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Source";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/Source",
+					"$(PROJECT_DIR)/Sources",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;

@@ -8,6 +8,7 @@
 
 #import "AJKShortcutWindowController.h"
 #import <ShortcutRecorder/ShortcutRecorder.h>
+#import "LogClient.h"
 
 
 @interface AJKShortcutWindowController () <SRRecorderControlDelegate>
