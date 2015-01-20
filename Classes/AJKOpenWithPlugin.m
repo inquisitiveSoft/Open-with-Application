@@ -27,14 +27,17 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 @interface AJKOpenWithPlugin () <AJKShortcutWindowControllerDelegate>
 
+@property (copy) NSString *pluginName;
+@property (strong, nonatomic, readonly) NSUserDefaults *userDefaults;
+
 @property (strong) NSMenuItem *openInApplicationMenuItem;
 @property (strong) AJKShortcutWindowController *shortcutWindowController;
-@property (strong, nonatomic) NSUserDefaults *userDefaults;
 
 @end
 
 
 @implementation AJKOpenWithPlugin
+@synthesize userDefaults = _userDefaults;
 
 
 + (void)pluginDidLoad:(NSBundle *)plugin
@@ -52,6 +55,9 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	self = [super init];
 
 	if(self) {
+		NSBundle *pluginBundle = [NSBundle bundleForClass:self.class];
+		self.pluginName = [pluginBundle infoDictionary][@"CFBundleName"];
+		
 		// Add menu bar items for the 'Show Project in Finder' and 'Open Project in Terminal' actions
 		NSMenu *fileMenu = [[[NSApp mainMenu] itemWithTitle:@"File"] submenu];
 		NSInteger desiredMenuItemIndex = [fileMenu indexOfItemWithTitle:@"Open with External Editor"];
@@ -102,7 +108,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			
 			[self updateOpenWithApplicationMenu];
 		} else if([NSApp mainMenu]) {
-			PluginLog(@"AJKOpenWithPlugin Xcode plugin: Couldn't find an 'Open with External Editor' item in the File menu");
+			PluginLogWithName(self.pluginName, @"Couldn't find an 'Open with External Editor' item in the File menu");
 		}
 	}
 
@@ -153,10 +159,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	
 	if(scope == AJKShortcutScopeProject) {
 		urlToOpen = [self projectDirectoryURL];
-		PluginLog(@"AJKOpenWithPlugin Xcode plugin: projectDirectory: %@", urlToOpen);
 	}
-	
-	PluginLog(@"AJKOpenWithPlugin Xcode plugin: scope: %ld", scope);
 	
 	if(urlToOpen && [applicationIdentifier length]) {
 		// Handle special cases
@@ -185,7 +188,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		}
 		
 		@catch (NSException *exception) {
-			PluginLog(@"AJKOpenWithPlugin Xcode plugin: encountered an exception: %@ in openScope:%ld inExternalEditorForIdentifier:%@", exception, scope, applicationIdentifier);
+			PluginLogWithName(self.pluginName, @"Encountered an exception: %@ in openScope:%ld inExternalEditorForIdentifier:%@", exception, scope, applicationIdentifier);
 		}
 	}
 }
@@ -240,10 +243,10 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			}
 			
 			@catch (NSException *exception) {
-				PluginLog(@"AJKExtendeddOpening: Encountered an exception while launching iTerm: %@", exception);
+				PluginLogWithName(self.pluginName, @"Encountered an exception while launching iTerm: %@", exception);
 			}
 		} else {
-			PluginLog(@"Unrecognized terminal emulator: '%@'", applicationIdentifier);
+			PluginLogWithName(self.pluginName, @"Unrecognized terminal emulator: '%@'", applicationIdentifier);
 		}
 	}
 }
@@ -275,7 +278,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	if(applicationIdentifier) {
 		[self openScope:scope inExternalEditorForIdentifier:applicationIdentifier];
 	} else {
-		PluginLog(@"AJKOpenWithPlugin: Couldn't find application identifier for nemu item: %@", menuItem.title);
+		PluginLogWithName(self.pluginName, @"Couldn't find application identifier for nemu item: %@", menuItem.title);
 	}
 }
 
@@ -491,7 +494,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	}
 	
 	@catch (NSException *exception) {
-		PluginLog(@"AJKOpenWithPlugin Xcode plugin: Raised an exception while looking for the URL of the sourceCodeDocument: %@", exception);
+		PluginLogWithName(self.pluginName, @"Raised an exception while looking for the URL of the sourceCodeDocument: %@", exception);
 	}
 	
 	return nil;
@@ -511,7 +514,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		}
 		
 		@catch (NSException *exception) {
-			PluginLog(@"AJKOpenWithPlugin Xcode plugin: Raised an exception while asking for the documents '_workspace.representingFilePath.relativePathOnVolume' key path: %@", exception);
+			PluginLogWithName(self.pluginName, @"Raised an exception while asking for the documents '_workspace.representingFilePath.relativePathOnVolume' key path: %@", exception);
 		}
 	}
 	
