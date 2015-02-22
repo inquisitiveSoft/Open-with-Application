@@ -125,12 +125,12 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	if([menuItem action] == @selector(openWithExternalEditor:)) {
 		return [[self currentFileURL] isFileURL];
 	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
-		return (BOOL)[self projectDirectoryURL];
+		return [self projectDirectoryURL].path.length > 0;
 	} else if([menuItem action] == @selector(openApplicationForMenuItem:)) {
 		if(menuItem.tag == AJKShortcutScopeDocument) {
 			return [[self currentFileURL] isFileURL];
 		} else {
-			return (BOOL)[self projectDirectoryURL];
+			return [self projectDirectoryURL].path.length > 0;
 		}
 	}
 	

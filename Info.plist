@@ -35,6 +35,6 @@
 	<key>XCGCReady</key>
 	<true/>
 	<key>XCPluginHasUI</key>
-	<false/>
+	<true/>
 </dict>
 </plist>
