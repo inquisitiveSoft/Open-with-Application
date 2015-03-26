@@ -542,8 +542,11 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		
 		if([applicationURLs count]) {
 			NSURL *applicationURL = [applicationURLs objectAtIndex:0];
-			NSString *applicationIdentifier = [[NSBundle bundleWithURL:applicationURL] bundleIdentifier];
-			return applicationIdentifier;
+			
+			if(applicationURL) {
+				NSString *applicationIdentifier = [[NSBundle bundleWithURL:applicationURL] bundleIdentifier];
+				return applicationIdentifier;
+			}
 		}
 	}
 
@@ -557,8 +560,11 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	
 	if(applicationIdentifier) {
 		NSURL *applicationURL = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:applicationIdentifier];
-		NSBundle *bundle = [NSBundle bundleWithURL:applicationURL];
-		appName = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
+		
+		if(applicationURL) {
+			NSBundle *bundle = [NSBundle bundleWithURL:applicationURL];
+			appName = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
+		}
 	}
 	
 	return appName;
