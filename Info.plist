@@ -30,6 +30,7 @@
 		<string>992275C1-432A-4CF7-B659-D84ED6D42D3F</string>
 		<string>A16FF353-8441-459E-A50C-B071F53F51B7</string>
 		<string>9F75337B-21B4-4ADC-B558-F9CADF7073A7</string>
+		<string>AABB7188-E14E-4433-AD3B-5CD791EAD9A3</string>
 	</array>
 	<key>LSApplicationCategoryType</key>
 	<string></string>
@@ -41,5 +42,30 @@
 	<true/>
 	<key>XCPluginHasUI</key>
 	<false/>
+	<key>AJKSuggestedScripts</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>Open Emacs</string>
+			<key>script</key>
+			<string>#!/bin/sh
+
+emacs +$CURSOR_LINE:$CURSOR_COLUMN $PATH_TO_FILE</string>
+		</dict>
+	</array>
+	<key>AJKTemplateScripts</key>
+	<dict>
+		<key>name</key>
+		<string>Script name</string>
+		<key>script</key>
+		<string>#!/bin/sh
+
+# 
+# 
+# 
+# 
+
+emacs +$CURSOR_LINE:$CURSOR_COLUMN $PATH_TO_FILE</string>
+	</dict>
 </dict>
 </plist>

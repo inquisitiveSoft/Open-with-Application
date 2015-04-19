@@ -28,6 +28,8 @@ void PluginLogWithName(NSString *pluginName, NSString *format, ...)
 #endif
     [logString setAttributes:[NSDictionary dictionaryWithObject:[NSFont fontWithName:@"Helvetica-Bold" size:15.f] forKey:NSFontAttributeName] range:NSMakeRange(0, string.length)];
     [[NSNotificationCenter defaultCenter] postNotificationName:PluginLoggerShouldLogNotification object:logString];
+	
+	printf("%s", [[logString string] UTF8String]);
     va_end(argumentList);
 }
 
@@ -44,5 +46,7 @@ void PluginLog(NSString *format, ...)
 #endif
     [logString setAttributes:[NSDictionary dictionaryWithObject:[NSFont fontWithName:@"Helvetica-Bold" size:15.f] forKey:NSFontAttributeName] range:NSMakeRange(0, string.length)];
     [[NSNotificationCenter defaultCenter] postNotificationName:PluginLoggerShouldLogNotification object:logString];
+
+	printf("%s", [[logString string] UTF8String]);
     va_end(argumentList);
 }

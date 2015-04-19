@@ -120,7 +120,7 @@
 
 
 	// Insert the cancel button
-	CGFloat cancelButtonWidth = 140.0;
+	CGFloat cancelButtonWidth = 132.0;
 	NSRect cancelFrame = NSInsetRect(contentView.frame, 20.0, 8.0);
 	cancelFrame.size = NSMakeSize(cancelButtonWidth, 44.0);
 	
@@ -134,7 +134,7 @@
 	
 	
 	// Insert the create button
-	CGFloat createButtonWidth = 140.0;
+	CGFloat createButtonWidth = 110.0;
 	NSRect createFrame = NSInsetRect(contentView.bounds, 20.0, 8.0);
 	createFrame.origin.x = createFrame.size.width - createButtonWidth;
 	createFrame.size = NSMakeSize(createButtonWidth + 16.0, 44.0);
@@ -221,7 +221,7 @@
 }
 
 
-- (IBAction)updateShortcut:(id)sender
+- (IBAction)updateScript:(id)sender
 {
 	id <AJKShortcutWindowControllerDelegate> delegate = self.delegate;
 	if([delegate respondsToSelector:@selector(addApplicationWithIdentifier:scope:shortcut:)]) {

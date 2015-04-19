@@ -13,6 +13,7 @@
 		4A56D61B1608076A00AFA23C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 089C1672FE841209C02AAC07 /* Foundation.framework */; };
 		4A5CEEA619C11E2200382A77 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A5CEEA419C11DFD00382A77 /* AppKit.framework */; };
 		4A5CEEA719C11E2600382A77 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A5CEEA219C11DF300382A77 /* ScriptingBridge.framework */; };
+		4A9FF8731AE4373F00498DE9 /* AJKScriptWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A9FF8721AE4373F00498DE9 /* AJKScriptWindowController.m */; };
 		4AA1B2201A97445F00278E50 /* ShortcutRecorder.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4AF54D2C1A6EA186005ACBB2 /* ShortcutRecorder.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4AF54D2D1A6EA186005ACBB2 /* ShortcutRecorder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AF54D2C1A6EA186005ACBB2 /* ShortcutRecorder.framework */; };
 /* End PBXBuildFile section */
@@ -51,6 +52,8 @@
 		4A56D61F1608076A00AFA23C /* Open With Application.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Open With Application.xcplugin"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A5CEEA219C11DF300382A77 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/Frameworks/ScriptingBridge.framework; sourceTree = DEVELOPER_DIR; };
 		4A5CEEA419C11DFD00382A77 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/Frameworks/AppKit.framework; sourceTree = DEVELOPER_DIR; };
+		4A9FF8711AE4373F00498DE9 /* AJKScriptWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AJKScriptWindowController.h; sourceTree = "<group>"; };
+		4A9FF8721AE4373F00498DE9 /* AJKScriptWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AJKScriptWindowController.m; sourceTree = "<group>"; };
 		4AC443F419BC5F5D0041D2E1 /* AJKDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AJKDefines.h; sourceTree = "<group>"; };
 		4AF54D2C1A6EA186005ACBB2 /* ShortcutRecorder.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ShortcutRecorder.framework; path = Sources/ShortcutRecorder.framework; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -135,6 +138,8 @@
 				4A4250641607FB5A00277699 /* AJKOpenWithPlugin.m */,
 				4A27B2F119BBCA2900111F65 /* AJKShortcutWindowController.h */,
 				4A27B2F219BBCA2900111F65 /* AJKShortcutWindowController.m */,
+				4A9FF8711AE4373F00498DE9 /* AJKScriptWindowController.h */,
+				4A9FF8721AE4373F00498DE9 /* AJKScriptWindowController.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -194,6 +199,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A56D6191608076A00AFA23C /* AJKOpenWithPlugin.m in Sources */,
+				4A9FF8731AE4373F00498DE9 /* AJKScriptWindowController.m in Sources */,
 				4A27B2F419BBCA2900111F65 /* AJKShortcutWindowController.m in Sources */,
 				4A2E14611A6EAC8700A46A70 /* LogClient.m in Sources */,
 			);
