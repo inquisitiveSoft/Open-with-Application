@@ -33,9 +33,6 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 @interface AJKOpenWithPlugin () <AJKShortcutWindowControllerDelegate, AJKScriptWindowControllerDelegate>
 
 @property (copy) NSString *pluginName;
-@property (assign) BOOL haveInsertedMenu;
-@property (assign) CGFloat insertMenuDelay;
-
 @property (strong, nonatomic, readonly) NSUserDefaults *userDefaults;
 
 @property (strong) NSMenuItem *openInApplicationMenuItem;
@@ -67,19 +64,17 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		NSBundle *pluginBundle = [NSBundle bundleForClass:self.class];
 		self.pluginName = [pluginBundle infoDictionary][@"CFBundleName"];
 	
-		[self insertMenu:TRUE];
+		[[NSOperationQueue mainQueue] addOperationWithBlock:^{
+			[self insertMenuItems];
+		}];
 	}
 
 	return self;
 }
 
 
-- (void)insertMenu:(BOOL)retryRecursively
+- (void)insertMenuItems
 {
-	if(self.haveInsertedMenu) {
-		return;
-	}
-	
 	// Add menu bar items for the 'Show Project in Finder' and 'Open Project in Terminal' actions
 	NSMenu *fileMenu = [[[NSApp mainMenu] itemWithTitle:@"File"] submenu];
 	NSInteger desiredMenuItemIndex = [fileMenu indexOfItemWithTitle:@"Open with External Editor"];
@@ -130,21 +125,10 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		self.openInApplicationMenuItem = openInApplicationMenuItem;
 		
 		[self updateOpenWithApplicationMenu];
-		self.haveInsertedMenu = TRUE;
 	} else if([NSApp mainMenu]) {
 		PluginLogWithName(self.pluginName, @"Couldn't find an 'Open with External Editor' item in the File menu");
 	} else {
 		PluginLogWithName(self.pluginName, @"[NSApp mainMenu] returned nil");
-	}
-	
-	
-	if(!self.haveInsertedMenu && retryRecursively) {
-		// A really inelegant way to create the menu, but seems necessary now on Xcode 7
-		self.insertMenuDelay = MAX(self.insertMenuDelay + self.insertMenuDelay, 0.1);
-		
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.insertMenuDelay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-			[self insertMenu:retryRecursively];
-		});
 	}
 }
 
