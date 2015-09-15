@@ -214,7 +214,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 - (void)performScriptForIdentifier:(NSString *)scriptIdentifier
 {
-	NSURL *fileURL = [self currentFileURL];
+//	NSURL *fileURL = [self currentFileURL];
 	NSURL *projectURL = [self projectDirectoryURL];
 	
 	if(projectURL && [scriptIdentifier length]) {
