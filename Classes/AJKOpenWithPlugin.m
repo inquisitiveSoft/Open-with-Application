@@ -128,7 +128,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	} else if([NSApp mainMenu]) {
 		PluginLogWithName(self.pluginName, @"Couldn't find an 'Open with External Editor' item in the File menu");
 	} else {
-		PluginLogWithName(self.pluginName, @"[NSApp mainMenu] returned nil");
+//		PluginLogWithName(self.pluginName, @"[NSApp mainMenu] returned nil");
 	}
 }
 
