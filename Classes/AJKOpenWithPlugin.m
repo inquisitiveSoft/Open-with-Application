@@ -64,12 +64,24 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		NSBundle *pluginBundle = [NSBundle bundleForClass:self.class];
 		self.pluginName = [pluginBundle infoDictionary][@"CFBundleName"];
 	
-		[[NSOperationQueue mainQueue] addOperationWithBlock:^{
-			[self insertMenuItems];
-		}];
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(applicationDidFinishLaunching:)
+         name:NSApplicationDidFinishLaunchingNotification
+         object:nil];
+        
 	}
 
 	return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)notification {
+    
+    [self insertMenuItems];
 }
 
 
