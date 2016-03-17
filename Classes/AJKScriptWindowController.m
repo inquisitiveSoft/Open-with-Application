@@ -19,7 +19,7 @@ NSString * const AJKSuggestedScriptText = @"script";
 NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSave";
 
 
-@interface AJKScriptWindowController () <SRRecorderControlDelegate>
+@interface AJKScriptWindowController () <SRRecorderControlDelegate, NSTextFieldDelegate, NSTextViewDelegate>
 
 @property (strong) SRValidator *shortcutValidator;
 
@@ -69,6 +69,7 @@ NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSa
 	scriptNameFrame.size.width -= 42.0;
 	
 	NSTextField *scriptNameField = [[NSTextField alloc] initWithFrame:scriptNameFrame];
+    scriptNameField.delegate = self;
 	scriptNameField.placeholderString = NSLocalizedString(@"Script Name", @"Script Name placeholder text");
 	[contentView addSubview:scriptNameField];
 	self.scriptNameField = scriptNameField;
@@ -92,7 +93,7 @@ NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSa
 	scriptTextViewFrame.origin.y -= 12.0 + scriptTextViewFrame.size.height;
 	
 	NSTextView *scriptTextView = [[NSTextView alloc] initWithFrame:scriptTextViewFrame];
-	scriptTextView.string = @"#!/bin/sh";
+    scriptTextView.delegate = self;
 	scriptTextView.font = [NSFont fontWithName:@"Menlo-Regular" size:12.0];
 	[contentView addSubview:scriptTextView];
 	self.scriptTextView = scriptTextView;
@@ -168,19 +169,22 @@ NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSa
 	
 	if(self.mode == AJKShortcutWindowCreateMode) {
 		self.window.title = NSLocalizedString(@"Create Script", @"Create Script window title");
-		
+        
+        self.scriptIdentifier = [[NSProcessInfo processInfo] globallyUniqueString];
+		self.scriptText = @"#!/bin/sh";
+        
 		[self.cancelButton setAction:@selector(dismiss:)];
 		self.cancelButton.title = NSLocalizedString(@"Cancel", @"Cancel button");
 		
-		[self.createShortcutButton setAction:@selector(createShortcut:)];
+		[self.createShortcutButton setAction:@selector(createScript:)];
 		self.createShortcutButton.title = NSLocalizedString(@"Create Script", @"Create Menu Item button");
 	} else {
 		self.window.title = NSLocalizedString(@"Edit Script", @"Edit Script window title");
 		
-		[self.cancelButton setAction:@selector(updateShortcut:)];
+		[self.cancelButton setAction:@selector(updateScript:)];
 		self.cancelButton.title = NSLocalizedString(@"Update Script", @"Update button");;
 		
-		[self.createShortcutButton setAction:@selector(removeShortcut:)];
+		[self.createShortcutButton setAction:@selector(removeScript:)];
 		self.createShortcutButton.title = NSLocalizedString(@"Remove Script", @"Remove button");
 	}
 }
@@ -196,12 +200,13 @@ NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSa
 		NSString *title = NSLocalizedString(@"Edit the '%@' Script", @"Edit Shortcut window title");
 		self.window.title = [NSString stringWithFormat:title, self.scriptName];
 	}
-	
-	[self.scriptNameField setStringValue: NSLocalizedString(@"Script name", @"")];
+    
+    [self.scriptNameField setStringValue: self.scriptName ?: NSLocalizedString(@"Script name", @"")];
 	[self.descriptionLabel setStringValue: NSLocalizedString(@"Set a keyboard shortcut to trigger this script", @"")];
-
+    
+    self.scriptTextView.string = self.scriptText ?: @"";
 	self.shortcutControl.objectValue = self.shortcutDictionary;
-	
+    
 	[self.window center];
 	[super showWindow:sender];
 }
@@ -212,6 +217,9 @@ NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSa
 
 - (IBAction)createScript:(id)sender
 {
+    self.scriptName = [self.scriptNameField stringValue];
+    self.scriptText = [self.scriptTextView string];
+    
 	id <AJKScriptWindowControllerDelegate> delegate = self.delegate;
 	if([delegate respondsToSelector:@selector(addScriptWithIdentifier:scriptName:script:shortcut:)]) {
 		[delegate addScriptWithIdentifier:self.scriptIdentifier scriptName:self.scriptName script:self.scriptText shortcut:self.shortcutControl.objectValue];
@@ -225,6 +233,7 @@ NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSa
 {
 	id <AJKScriptWindowControllerDelegate> delegate = self.delegate;
 	if([delegate respondsToSelector:@selector(removeScriptWithIdentifier:)]) {
+        PluginLog(@"removeScriptWithIdentifier: %@ delegate: %@", self.scriptIdentifier, delegate);
 		[delegate removeScriptWithIdentifier:self.scriptIdentifier];
 	}
 	
@@ -234,12 +243,7 @@ NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSa
 
 - (IBAction)updateScript:(id)sender
 {
-	id <AJKScriptWindowControllerDelegate> delegate = self.delegate;
-	if([delegate respondsToSelector:@selector(addScriptWithIdentifier:script:shortcut:)]) {
-		[delegate addScriptWithIdentifier:self.scriptIdentifier scriptName:self.scriptName script:self.scriptText shortcut:self.shortcutControl.objectValue];
-	}
-	
-	[self dismiss:nil];
+	[self createScript:nil];
 }
 
 

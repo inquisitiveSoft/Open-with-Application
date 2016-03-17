@@ -221,7 +221,7 @@
 }
 
 
-- (IBAction)updateScript:(id)sender
+- (IBAction)updateShortcut:(id)sender
 {
 	id <AJKShortcutWindowControllerDelegate> delegate = self.delegate;
 	if([delegate respondsToSelector:@selector(addApplicationWithIdentifier:scope:shortcut:)]) {
