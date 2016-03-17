@@ -249,8 +249,19 @@ NSString * const AJKScript = @"AJKScript";
             
             
             // Substitute variables
-            [shellScript replaceOccurrencesOfString:@"$CURSOR_LINE" withString:@"0" options:0 range:NSMakeRange(0, shellScript.length)];
-            [shellScript replaceOccurrencesOfString:@"$CURSOR_COLUMN" withString:@"0" options:0 range:NSMakeRange(0, shellScript.length)];
+            NSTextView *currentlySelectedTextView = self.currentlySelectedTextView;
+            
+            if(currentlySelectedTextView == [[currentlySelectedTextView window] firstResponder]) {
+                NSRange selectedRange = currentlySelectedTextView.selectedRange;
+                NSString *currentText = currentlySelectedTextView.string;
+                
+                // Work out line and column from text
+                PluginLog(@"%@ - %@", NSStringFromRange(selectedRange), currentText);
+                
+                [shellScript replaceOccurrencesOfString:@"$CURSOR_LINE" withString:@"0" options:0 range:NSMakeRange(0, shellScript.length)];
+                [shellScript replaceOccurrencesOfString:@"$CURSOR_COLUMN" withString:@"0" options:0 range:NSMakeRange(0, shellScript.length)];
+            }
+            
             [shellScript replaceOccurrencesOfString:@"$PATH_TO_FILE" withString:[fileURL path] ?: @"" options:0 range:NSMakeRange(0, shellScript.length)];
             [shellScript replaceOccurrencesOfString:@"$PATH_TO_PROJECT" withString:[projectURL path] ?: @"" options:0 range:NSMakeRange(0, shellScript.length)];
             
@@ -810,7 +821,7 @@ NSString * const AJKScript = @"AJKScript";
 }
 
 
-- (NSRange)currentSelection
+- (NSTextView *)currentlySelectedTextView
 {
 	@try {
 		NSWindowController *currentWindowController = [[NSApp keyWindow] windowController];
@@ -820,7 +831,7 @@ NSString * const AJKScript = @"AJKScript";
 			
 			// Get current selection
 			if(editor && [[NSApp keyWindow] firstResponder] == [editor textView]) {
-				return [[editor textView] selectedRange];
+				return [editor textView];
 			}
 		}
 	}
@@ -829,7 +840,7 @@ NSString * const AJKScript = @"AJKScript";
 		PluginLogWithName(self.pluginName, @"Raised an exception while looking for the current documents selection: %@", exception);
 	}
 	
-	return NSMakeRange(NSNotFound, 0);
+	return nil;
 }
 
 

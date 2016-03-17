@@ -10,7 +10,7 @@
 			<key>script</key>
 			<string>#!/bin/sh
 
-emacs +$CURSOR_LINE:$CURSOR_COLUMN $PATH_TO_FILE</string>
+emacs +$CURSOR_LINE:$CURSOR_COLUMN &quot;$PATH_TO_FILE&quot;</string>
 		</dict>
 	</array>
 	<key>AJKTemplateScripts</key>
