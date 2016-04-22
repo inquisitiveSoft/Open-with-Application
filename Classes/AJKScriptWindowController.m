@@ -169,9 +169,10 @@ NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSa
 	
 	if(self.mode == AJKShortcutWindowCreateMode) {
 		self.window.title = NSLocalizedString(@"Create Script", @"Create Script window title");
-        
         self.scriptIdentifier = [[NSProcessInfo processInfo] globallyUniqueString];
-		self.scriptText = @"#!/bin/sh";
+        
+        NSDictionary *infoDictionary = [[NSBundle bundleForClass:self.class] infoDictionary];
+		self.scriptText = infoDictionary[@"AJKTemplateScript"][@"script"];
         
 		[self.cancelButton setAction:@selector(dismiss:)];
 		self.cancelButton.title = NSLocalizedString(@"Cancel", @"Cancel button");
@@ -201,7 +202,7 @@ NSString * const AJKSuggestedScriptRequiresSave = @"AJKSuggestedScriptRequiresSa
 		self.window.title = [NSString stringWithFormat:title, self.scriptName];
 	}
     
-    [self.scriptNameField setStringValue: self.scriptName ?: NSLocalizedString(@"Script name", @"")];
+    [self.scriptNameField setStringValue: self.scriptName ?: NSLocalizedString(@"Script Name", @"")];
 	[self.descriptionLabel setStringValue: NSLocalizedString(@"Set a keyboard shortcut to trigger this script", @"")];
     
     self.scriptTextView.string = self.scriptText ?: @"";

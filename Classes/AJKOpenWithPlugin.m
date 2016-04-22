@@ -30,6 +30,16 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 NSString * const AJKScript = @"AJKScript";
 
 
+typedef struct AJKCursorLocation {
+    NSInteger startCursorLine;
+    NSInteger startCursorPosition;   // Relative to the current line
+    NSInteger endCursorLine;
+    NSInteger endCursorPosition;   // Relative to the current line
+} AJKCursorLocation;
+
+
+AJKCursorLocation AJKCursorLocationForSelectionInText(NSRange selectedRange, NSString *currentText);
+
 
 @interface AJKOpenWithPlugin () <AJKShortcutWindowControllerDelegate, AJKScriptWindowControllerDelegate>
 
@@ -64,13 +74,15 @@ NSString * const AJKScript = @"AJKScript";
 	if(self) {
 		NSBundle *pluginBundle = [NSBundle bundleForClass:self.class];
 		self.pluginName = [pluginBundle infoDictionary][@"CFBundleName"];
-	
-        [[NSNotificationCenter defaultCenter]
-         addObserver:self
-         selector:@selector(applicationDidFinishLaunching:)
-         name:NSApplicationDidFinishLaunchingNotification
-         object:nil];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
+        
+        NSFileManager *fileManager = [[NSFileManager alloc] init];
+        
+        NSError *error = nil;
+        if([fileManager removeItemAtPath:[self temporaryScriptsDirectoryPath] error:&error]) {
+            PluginLogWithName(self.pluginName, @"Couldn't remove the temporary shell script directory: '%@', %@", [self temporaryScriptsDirectoryPath], error);
+        }
 	}
 
 	return self;
@@ -153,7 +165,7 @@ NSString * const AJKScript = @"AJKScript";
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
-	if([menuItem action] == @selector(openWithExternalEditor:)) {
+	if([menuItem action] == @selector(openWithDefaultExternalEditor:)) {
 		return [[self currentFileURL] isFileURL];
 	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
 		return [self projectDirectoryURL].path.length > 0;
@@ -163,8 +175,14 @@ NSString * const AJKScript = @"AJKScript";
 		} else {
 			return [self projectDirectoryURL].path.length > 0;
 		}
+    } else if([menuItem action] == @selector(performScriptForMenuItem:)) {
+        return [[self currentFileURL] isFileURL];
 	} else if([menuItem action] == @selector(editPodfile:)) {
-		return [[self userDefaults] objectForKey:AJKExternalEditorBundleIdentifier] && [self projectDirectoryURL].path.length > 0;
+        NSString *projectDirectoryPath = [self projectDirectoryURL].path;
+        BOOL isDirectory = FALSE;
+        
+		return [[self userDefaults] objectForKey:AJKExternalEditorBundleIdentifier] && projectDirectoryPath.length > 0
+                && [[NSFileManager defaultManager] fileExistsAtPath:projectDirectoryPath isDirectory:&isDirectory] && !isDirectory;
 	}
 	
 	return TRUE;
@@ -257,30 +275,60 @@ NSString * const AJKScript = @"AJKScript";
                 
                 // Work out line and column from text
                 PluginLog(@"%@ - %@", NSStringFromRange(selectedRange), currentText);
+                AJKCursorLocation cursorLocation = AJKCursorLocationForSelectionInText(selectedRange, currentText);
                 
-                [shellScript replaceOccurrencesOfString:@"$CURSOR_LINE" withString:@"0" options:0 range:NSMakeRange(0, shellScript.length)];
-                [shellScript replaceOccurrencesOfString:@"$CURSOR_COLUMN" withString:@"0" options:0 range:NSMakeRange(0, shellScript.length)];
+                
+                NSString *cursorLineString = [NSString stringWithFormat:@"%ld", cursorLocation.startCursorLine];
+                NSString *cursorColumnString = [NSString stringWithFormat:@"%ld", cursorLocation.startCursorPosition];
+                
+                [shellScript replaceOccurrencesOfString:@"$CURSOR_LINE" withString:cursorLineString options:0 range:NSMakeRange(0, shellScript.length)];
+                [shellScript replaceOccurrencesOfString:@"$CURSOR_COLUMN" withString:cursorColumnString options:0 range:NSMakeRange(0, shellScript.length)];
+                
+                [shellScript replaceOccurrencesOfString:@"$START_LINE" withString:cursorLineString options:0 range:NSMakeRange(0, shellScript.length)];
+                [shellScript replaceOccurrencesOfString:@"$START_COLUMN" withString:cursorColumnString options:0 range:NSMakeRange(0, shellScript.length)];
+
+                
+                NSString *endCursorLineString = [NSString stringWithFormat:@"%ld", cursorLocation.endCursorLine];
+                NSString *endCursorColumnString = [NSString stringWithFormat:@"%ld", cursorLocation.endCursorPosition];
+                
+                [shellScript replaceOccurrencesOfString:@"$END_LINE" withString:endCursorLineString options:0 range:NSMakeRange(0, shellScript.length)];
+                [shellScript replaceOccurrencesOfString:@"$END_COLUMN" withString:endCursorColumnString options:0 range:NSMakeRange(0, shellScript.length)];
+                
+                
+                NSString *selectionLengthString = [NSString stringWithFormat:@"%ld", selectedRange.length];
+                [shellScript replaceOccurrencesOfString:@"$SELECTION_LENGTH" withString:selectionLengthString options:0 range:NSMakeRange(0, shellScript.length)];
             }
             
             [shellScript replaceOccurrencesOfString:@"$PATH_TO_FILE" withString:[fileURL path] ?: @"" options:0 range:NSMakeRange(0, shellScript.length)];
             [shellScript replaceOccurrencesOfString:@"$PATH_TO_PROJECT" withString:[projectURL path] ?: @"" options:0 range:NSMakeRange(0, shellScript.length)];
             
             
+            // Create the temp scripts directory
+            NSError *error = nil;
+            NSFileManager *fileManager = [[NSFileManager alloc] init];
+            NSString *scriptDirectory = [self temporaryScriptsDirectoryPath];
+            
+            if(![fileManager createDirectoryAtPath:scriptDirectory withIntermediateDirectories:TRUE attributes:nil error:&error]) {
+                PluginLogWithName(self.pluginName, @"Couldn't create the scripts folder at '%@', %@", scriptDirectory, [error localizedDescription]);
+                return;
+            }
+            
+            
             // Save the shell script to a temporary file
-            NSString *scriptPath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+            NSString *scriptPath = [scriptDirectory stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
             scriptPath = [scriptPath stringByAppendingPathExtension:@"sh"];
             
-            NSError *error = nil;
             if(![shellScript writeToFile:scriptPath atomically:TRUE encoding:NSUTF8StringEncoding error:&error]) {
                 PluginLogWithName(self.pluginName, @"Couldn't save shell script: %@", error);
                 return;
             }
             
+            
             // Mark it as executable
             NSNumber *permissions = [NSNumber numberWithUnsignedLong: 493];
             NSDictionary *attributes = [NSDictionary dictionaryWithObject:permissions forKey:NSFilePosixPermissions];
             
-            if(![[NSFileManager defaultManager] setAttributes:attributes ofItemAtPath:scriptPath error:&error]) {
+            if(![fileManager setAttributes:attributes ofItemAtPath:scriptPath error:&error]) {
                 PluginLogWithName(self.pluginName, @"Couldn't set the shell script '%@' to be executable %@", scriptPath, error);
                 return;
             }
@@ -914,6 +962,12 @@ NSString * const AJKScript = @"AJKScript";
 }
 
 
+- (NSString *)temporaryScriptsDirectoryPath
+{
+    return [NSTemporaryDirectory() stringByAppendingPathComponent:@"OpenWithApplication"];
+}
+
+
 
 #pragma mark - A helper method to use in developing
 
@@ -934,3 +988,39 @@ NSString * const AJKScript = @"AJKScript";
 
 
 @end
+
+
+
+AJKCursorLocation AJKCursorLocationForSelectionInText(NSRange selectedRange, NSString *currentText) {
+    NSRange textRange = NSMakeRange(0, currentText.length);
+    
+    NSInteger selectionStart = selectedRange.location;
+    NSInteger selectionEnd = selectedRange.location + selectedRange.length;
+    
+    __block NSInteger startCursorLine = 0;
+    __block NSInteger startCursorPosition = 0;
+    __block NSInteger endCursorLine = 0;
+    __block NSInteger endCursorPosition = 0;
+    
+    [currentText enumerateSubstringsInRange:textRange options:NSStringEnumerationByLines usingBlock:^(NSString * _Nullable substring, NSRange substringRange, NSRange enclosingRange, BOOL * _Nonnull stop) {
+        if (enclosingRange.location <= selectionEnd) {
+            if (enclosingRange.location <= selectionStart) {
+                startCursorLine += 1;
+                startCursorPosition = MAX(selectionStart - substringRange.location + 1, 0);
+            }
+            
+            endCursorLine += 1;
+            endCursorPosition = MAX(selectionEnd - substringRange.location + 1, 0);
+        } else {
+            *stop = TRUE;
+        }
+    }];
+    
+    __block AJKCursorLocation cursorLocation;
+    cursorLocation.startCursorLine = startCursorLine;
+    cursorLocation.startCursorPosition = startCursorPosition;
+    cursorLocation.endCursorLine = endCursorLine;
+    cursorLocation.endCursorPosition = endCursorPosition;
+    return cursorLocation;
+}
+

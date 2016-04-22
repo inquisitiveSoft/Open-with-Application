@@ -10,22 +10,91 @@
 			<key>script</key>
 			<string>#!/bin/sh
 
+#   Substitution Tokens
+#   ===================
+#   Paths:
+#   $PATH_TO_PROJECT, $PATH_TO_FILE
+#   (Remember to wrap paths in quotation marks)
+#
+#   Current documents text selection: 
+#   $CURSOR_LINE, $CURSOR_COLUMN aka $START_LINE, $START_COLUMN
+#   $END_LINE, $END_COLUMN, $SELECTION_LENGTH
+
 emacs +$CURSOR_LINE:$CURSOR_COLUMN &quot;$PATH_TO_FILE&quot;</string>
 		</dict>
+		<dict>
+			<key>name</key>
+			<string>Open Vim</string>
+			<key>script</key>
+			<string>#!/bin/sh
+
+#   Substitution Tokens
+#   ===================
+#   Paths:
+#   $PATH_TO_PROJECT, $PATH_TO_FILE
+#   (Remember to wrap paths in quotation marks)
+#
+#   Current documents text selection: 
+#   $CURSOR_LINE, $CURSOR_COLUMN aka $START_LINE, $START_COLUMN
+#   $END_LINE, $END_COLUMN, $SELECTION_LENGTH
+
+vim -c &quot;:cal cursor($CURSOR_LINE, $CURSOR_COLUMN)&quot; &quot;$PATH_TO_FILE&quot;</string>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Open TextMate</string>
+			<key>script</key>
+			<string>#!/bin/sh
+
+#   Substitution Tokens
+#   ===================
+#   Paths:
+#   $PATH_TO_PROJECT, $PATH_TO_FILE
+#   (Remember to wrap paths in quotation marks)
+#
+#   Current documents text selection: 
+#   $CURSOR_LINE, $CURSOR_COLUMN aka $START_LINE, $START_COLUMN
+#   $END_LINE, $END_COLUMN, $SELECTION_LENGTH
+
+mate -l $START_LINE:$START_COLUMN-$END_LINE:$END_COLUMN &quot;$PATH_TO_FILE&quot;</string>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Open Pico</string>
+			<key>script</key>
+			<string>#!/bin/sh
+
+#   Substitution Tokens
+#   ===================
+#   Paths:
+#   $PATH_TO_PROJECT, $PATH_TO_FILE
+#   (Remember to wrap paths in quotation marks)
+#
+#   Current documents text selection: 
+#   $CURSOR_LINE, $CURSOR_COLUMN aka $START_LINE, $START_COLUMN
+#   $END_LINE, $END_COLUMN, $SELECTION_LENGTH
+
+pico +$CURSOR_LINE,$CURSOR_COLUMN &quot;$PATH_TO_FILE&quot;</string>
+		</dict>
 	</array>
-	<key>AJKTemplateScripts</key>
+	<key>AJKTemplateScript</key>
 	<dict>
 		<key>name</key>
 		<string>Script name</string>
 		<key>script</key>
 		<string>#!/bin/sh
 
-# 
-# 
-# 
-# 
+#   Substitution Tokens
+#   ===================
+#   Paths:
+#   $PATH_TO_PROJECT, $PATH_TO_FILE
+#   (Remember to wrap paths in quotation marks)
+#
+#   Current documents text selection: 
+#   $CURSOR_LINE, $CURSOR_COLUMN aka $START_LINE, $START_COLUMN
+#   $END_LINE, $END_COLUMN, $SELECTION_LENGTH
 
-emacs +$CURSOR_LINE:$CURSOR_COLUMN $PATH_TO_FILE</string>
+</string>
 	</dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
