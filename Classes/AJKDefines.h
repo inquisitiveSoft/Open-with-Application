@@ -10,4 +10,5 @@
 typedef NS_ENUM(NSInteger, AJKShortcutScope) {
 	AJKShortcutScopeProject = 0,
 	AJKShortcutScopeDocument = 1,
+	AJKShortcutScopePodfile = 2
 };

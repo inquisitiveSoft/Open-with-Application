@@ -27,7 +27,18 @@ NSString * const AJKShortcutIdentifier = @"AJKShortcutIdentifier";
 NSString * const AJKScriptName = @"AJKScriptName";
 NSString * const AJKShortcutScopeKey = @"AJKShortcutScopeKey";
 NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
+NSString * const AJKScript = @"AJKScript";
 
+
+typedef struct AJKCursorLocation {
+    NSInteger startCursorLine;
+    NSInteger startCursorPosition;   // Relative to the current line
+    NSInteger endCursorLine;
+    NSInteger endCursorPosition;   // Relative to the current line
+} AJKCursorLocation;
+
+
+AJKCursorLocation AJKCursorLocationForSelectionInText(NSRange selectedRange, NSString *currentText);
 
 
 @interface AJKOpenWithPlugin () <AJKShortcutWindowControllerDelegate, AJKScriptWindowControllerDelegate>
@@ -63,13 +74,15 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	if(self) {
 		NSBundle *pluginBundle = [NSBundle bundleForClass:self.class];
 		self.pluginName = [pluginBundle infoDictionary][@"CFBundleName"];
-	
-        [[NSNotificationCenter defaultCenter]
-         addObserver:self
-         selector:@selector(applicationDidFinishLaunching:)
-         name:NSApplicationDidFinishLaunchingNotification
-         object:nil];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:nil];
+        
+        NSFileManager *fileManager = [[NSFileManager alloc] init];
+        
+        NSError *error = nil;
+        if([fileManager removeItemAtPath:[self temporaryScriptsDirectoryPath] error:&error]) {
+            PluginLogWithName(self.pluginName, @"Couldn't remove the temporary shell script directory: '%@', %@", [self temporaryScriptsDirectoryPath], error);
+        }
 	}
 
 	return self;
@@ -84,13 +97,11 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
     [self insertMenuItems];
 }
 
-
 - (void)insertMenuItems
 {
 	// Add menu bar items for the 'Show Project in Finder' and 'Open Project in Terminal' actions
 	NSMenu *fileMenu = [[[NSApp mainMenu] itemWithTitle:@"File"] submenu];
 	NSInteger desiredMenuItemIndex = [fileMenu indexOfItemWithTitle:@"Open with External Editor"];
-	
 	
 	if(fileMenu && (desiredMenuItemIndex >= 0)) {
 		[fileMenu removeItemAtIndex:desiredMenuItemIndex];
@@ -127,6 +138,12 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		[fileMenu insertItem:selectTerminalMenuItem atIndex:desiredMenuItemIndex];
 		
 		desiredMenuItemIndex++;
+		NSMenuItem *editPodfileMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit Podfile" action:@selector(editPodfile:) keyEquivalent:@"P"];
+		[editPodfileMenuItem setTarget:self];
+		[editPodfileMenuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask | NSShiftKeyMask];
+		[fileMenu insertItem:editPodfileMenuItem atIndex:desiredMenuItemIndex];
+		
+		desiredMenuItemIndex++;
 		NSMenuItem *separatorItem = [NSMenuItem separatorItem];
 		[fileMenu insertItem:separatorItem atIndex:desiredMenuItemIndex];
 		
@@ -139,8 +156,6 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		[self updateOpenWithApplicationMenu];
 	} else if([NSApp mainMenu]) {
 		PluginLogWithName(self.pluginName, @"Couldn't find an 'Open with External Editor' item in the File menu");
-	} else {
-//		PluginLogWithName(self.pluginName, @"[NSApp mainMenu] returned nil");
 	}
 }
 
@@ -150,7 +165,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
-	if([menuItem action] == @selector(openWithExternalEditor:)) {
+	if([menuItem action] == @selector(openWithDefaultExternalEditor:)) {
 		return [[self currentFileURL] isFileURL];
 	} else if([menuItem action] == @selector(showProjectInFinder:) || [menuItem action] == @selector(openProjectInTerminal:)) {
 		return [self projectDirectoryURL].path.length > 0;
@@ -160,6 +175,14 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		} else {
 			return [self projectDirectoryURL].path.length > 0;
 		}
+    } else if([menuItem action] == @selector(performScriptForMenuItem:)) {
+        return [[self currentFileURL] isFileURL];
+	} else if([menuItem action] == @selector(editPodfile:)) {
+        NSString *projectDirectoryPath = [self projectDirectoryURL].path;
+        BOOL isDirectory = FALSE;
+        
+		return [[self userDefaults] objectForKey:AJKExternalEditorBundleIdentifier] && projectDirectoryPath.length > 0
+                && [[NSFileManager defaultManager] fileExistsAtPath:projectDirectoryPath isDirectory:&isDirectory] && !isDirectory;
 	}
 	
 	return TRUE;
@@ -187,6 +210,8 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	
 	if(scope == AJKShortcutScopeProject) {
 		urlToOpen = [self projectDirectoryURL];
+	} else if(scope == AJKShortcutScopePodfile) {
+		urlToOpen = [[self projectDirectoryURL] URLByAppendingPathComponent:@"Podfile"];
 	} else {
 		urlToOpen = [self currentFileURL];
 	}
@@ -226,27 +251,129 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 - (void)performScriptForIdentifier:(NSString *)scriptIdentifier
 {
-//	NSURL *fileURL = [self currentFileURL];
+	NSURL *fileURL = [self currentFileURL];
 	NSURL *projectURL = [self projectDirectoryURL];
 	
 	if(projectURL && [scriptIdentifier length]) {
-		// Handle special cases
-		@try {
-			NSString *shellScript = nil;
-			
-			if(shellScript.length > 0) {
-				NSTask *task = [[NSTask alloc] init];
-				[task setCurrentDirectoryPath:projectURL.path];
-				[task setLaunchPath:@"/bin/sh"];
-				[task setArguments:@[@".", @"-c", shellScript]];
-				[task launch];
-			}
-		}
-		
-		@catch (NSException *exception) {
-			PluginLogWithName(self.pluginName, @"Encountered an exception: %@ in performScriptForIdentifier:%@", exception, scriptIdentifier);
-		}
+        NSDictionary *scriptDictionary = [self scriptDictionaryForIdentifier:scriptIdentifier];
+        
+        // Handle special cases
+        @try {
+            NSMutableString *shellScript = [scriptDictionary[AJKScript] mutableCopy];
+            
+            if(!(shellScript.length > 0)) {
+                return;
+            }
+            
+            
+            // Substitute variables
+            NSTextView *currentlySelectedTextView = self.currentlySelectedTextView;
+            
+            if(currentlySelectedTextView == [[currentlySelectedTextView window] firstResponder]) {
+                NSRange selectedRange = currentlySelectedTextView.selectedRange;
+                NSString *currentText = currentlySelectedTextView.string;
+                
+                // Work out line and column from text
+                PluginLog(@"%@ - %@", NSStringFromRange(selectedRange), currentText);
+                AJKCursorLocation cursorLocation = AJKCursorLocationForSelectionInText(selectedRange, currentText);
+                
+                
+                NSString *cursorLineString = [NSString stringWithFormat:@"%ld", cursorLocation.startCursorLine];
+                NSString *cursorColumnString = [NSString stringWithFormat:@"%ld", cursorLocation.startCursorPosition];
+                
+                [shellScript replaceOccurrencesOfString:@"$CURSOR_LINE" withString:cursorLineString options:0 range:NSMakeRange(0, shellScript.length)];
+                [shellScript replaceOccurrencesOfString:@"$CURSOR_COLUMN" withString:cursorColumnString options:0 range:NSMakeRange(0, shellScript.length)];
+                
+                [shellScript replaceOccurrencesOfString:@"$START_LINE" withString:cursorLineString options:0 range:NSMakeRange(0, shellScript.length)];
+                [shellScript replaceOccurrencesOfString:@"$START_COLUMN" withString:cursorColumnString options:0 range:NSMakeRange(0, shellScript.length)];
+
+                
+                NSString *endCursorLineString = [NSString stringWithFormat:@"%ld", cursorLocation.endCursorLine];
+                NSString *endCursorColumnString = [NSString stringWithFormat:@"%ld", cursorLocation.endCursorPosition];
+                
+                [shellScript replaceOccurrencesOfString:@"$END_LINE" withString:endCursorLineString options:0 range:NSMakeRange(0, shellScript.length)];
+                [shellScript replaceOccurrencesOfString:@"$END_COLUMN" withString:endCursorColumnString options:0 range:NSMakeRange(0, shellScript.length)];
+                
+                
+                NSString *selectionLengthString = [NSString stringWithFormat:@"%ld", selectedRange.length];
+                [shellScript replaceOccurrencesOfString:@"$SELECTION_LENGTH" withString:selectionLengthString options:0 range:NSMakeRange(0, shellScript.length)];
+            }
+            
+            [shellScript replaceOccurrencesOfString:@"$PATH_TO_FILE" withString:[fileURL path] ?: @"" options:0 range:NSMakeRange(0, shellScript.length)];
+            [shellScript replaceOccurrencesOfString:@"$PATH_TO_PROJECT" withString:[projectURL path] ?: @"" options:0 range:NSMakeRange(0, shellScript.length)];
+            
+            
+            // Create the temp scripts directory
+            NSError *error = nil;
+            NSFileManager *fileManager = [[NSFileManager alloc] init];
+            NSString *scriptDirectory = [self temporaryScriptsDirectoryPath];
+            
+            if(![fileManager createDirectoryAtPath:scriptDirectory withIntermediateDirectories:TRUE attributes:nil error:&error]) {
+                PluginLogWithName(self.pluginName, @"Couldn't create the scripts folder at '%@', %@", scriptDirectory, [error localizedDescription]);
+                return;
+            }
+            
+            
+            // Save the shell script to a temporary file
+            NSString *scriptPath = [scriptDirectory stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+            scriptPath = [scriptPath stringByAppendingPathExtension:@"sh"];
+            
+            if(![shellScript writeToFile:scriptPath atomically:TRUE encoding:NSUTF8StringEncoding error:&error]) {
+                PluginLogWithName(self.pluginName, @"Couldn't save shell script: %@", error);
+                return;
+            }
+            
+            
+            // Mark it as executable
+            NSNumber *permissions = [NSNumber numberWithUnsignedLong: 493];
+            NSDictionary *attributes = [NSDictionary dictionaryWithObject:permissions forKey:NSFilePosixPermissions];
+            
+            if(![fileManager setAttributes:attributes ofItemAtPath:scriptPath error:&error]) {
+                PluginLogWithName(self.pluginName, @"Couldn't set the shell script '%@' to be executable %@", scriptPath, error);
+                return;
+            }
+            
+            
+            // Use Applescript to invoke the shell script in Terminal
+            NSBundle *pluginBundle = [NSBundle bundleForClass:self.class];
+            NSURL *appleScriptURL = [pluginBundle URLForResource:@"Run Script in Terminal" withExtension:@"scpt"];
+            
+            NSString *appleScriptString = [NSString stringWithContentsOfURL:appleScriptURL encoding:NSUTF8StringEncoding error:&error];
+            
+            if (appleScriptString.length > 0) {
+                appleScriptString = [appleScriptString stringByReplacingOccurrencesOfString:@"SHELL_SCRIPT_PATH" withString:scriptPath];
+                
+                NSAppleScript *appleScript = [[NSAppleScript alloc] initWithSource:appleScriptString];
+                
+                NSDictionary *errorDictionary = nil;
+                NSAppleEventDescriptor *returnDescriptor = [appleScript executeAndReturnError:&errorDictionary];
+                PluginLogWithName(self.pluginName, @">> %@, errorDictionary: %@", returnDescriptor, errorDictionary);
+            }
+        }
+        
+        
+        @catch (NSException *exception) {
+            PluginLogWithName(self.pluginName, @"Encountered an exception: %@ in performScriptForIdentifier:%@", exception, scriptIdentifier);
+        }
 	}
+}
+
+
+- (NSDictionary *)scriptDictionaryForIdentifier:(NSString *)scriptIdentifier
+{
+    if(!scriptIdentifier) {
+        return nil;
+    }
+    
+    NSArray *scriptsArray = [[self userDefaults] objectForKey:AJKOpenWithScripts];
+
+    for(NSDictionary *script in scriptsArray) {
+        if([script[AJKShortcutIdentifier] isEqualToString:scriptIdentifier]) {
+            return script;
+        }
+    }
+    
+    return nil;
 }
 
 
@@ -369,13 +496,13 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	
 	AJKShortcutWindowController *shortcutWindowController = [[AJKShortcutWindowController alloc] init];
 	shortcutWindowController.delegate = self;
-	shortcutWindowController.mode = mode;
 	
 	shortcutWindowController.applicationIdentifier = applicationIdentifier;
 	shortcutWindowController.applicationName = [self applicationNameForIdentifier:applicationIdentifier];
 	shortcutWindowController.shortcutDictionary = shortcutDictionary;
-	
-	[shortcutWindowController showWindow:nil];
+    [shortcutWindowController showWindow:nil];
+    
+    shortcutWindowController.mode = mode;
 	self.shortcutWindowController = shortcutWindowController;
 }
 
@@ -431,6 +558,13 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 }
 
 
+- (void)editPodfile:(id)sender
+{
+	NSString *applicationIdentifier = [[self userDefaults] objectForKey:AJKExternalEditorBundleIdentifier];
+	[self openScope:AJKShortcutScopePodfile inExternalEditorForIdentifier:applicationIdentifier];
+}
+
+
 
 #pragma mark - Managing the Script section
 
@@ -438,7 +572,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 - (void)registerScriptWithApplicationShortcut:(id)sender
 {
 	NSString *scriptIdentifier = [[NSProcessInfo processInfo] globallyUniqueString];
-	[self presentScriptWindowForIdentifier:scriptIdentifier mode:AJKShortcutWindowCreateMode shortcut:nil];
+    [self presentScriptWindowForIdentifier:scriptIdentifier scriptName:nil scriptText:nil mode:AJKShortcutWindowCreateMode shortcut:nil];
 }
 
 
@@ -467,7 +601,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	
 	for(NSDictionary *applicationDictionary in scripts) {
 		if([applicationDictionary[AJKShortcutIdentifier] isEqualToString:scriptIdentifier]) {
-			[self presentScriptWindowForIdentifier:scriptIdentifier mode:AJKShortcutWindowEditMode shortcut:applicationDictionary[AJKShortcutDictionary]];
+            [self presentScriptWindowForIdentifier:scriptIdentifier scriptName:applicationDictionary[AJKScriptName] scriptText:applicationDictionary[AJKScript] mode:AJKShortcutWindowEditMode shortcut:applicationDictionary[AJKShortcutDictionary]];
 			break;
 		}
 	}
@@ -476,7 +610,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 }
 
 
-- (void)presentScriptWindowForIdentifier:(NSString *)scriptIdentifier mode:(AJKShortcutWindowMode)mode shortcut:(NSDictionary *)shortcutDictionary
+- (void)presentScriptWindowForIdentifier:(NSString *)scriptIdentifier scriptName:(NSString *)scriptName scriptText:(NSString *)scriptText mode:(AJKShortcutWindowMode)mode shortcut:(NSDictionary *)shortcutDictionary
 {
 	if(!scriptIdentifier) {
 		return;
@@ -484,11 +618,15 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	
 	AJKScriptWindowController *scriptWindowController = [[AJKScriptWindowController alloc] init];
 	scriptWindowController.delegate = self;
-	scriptWindowController.mode = mode;
 	
 	scriptWindowController.scriptIdentifier = scriptIdentifier;
 	scriptWindowController.shortcutDictionary = shortcutDictionary;
+    scriptWindowController.scriptName = scriptName;
+    scriptWindowController.scriptText = scriptText;
+    scriptWindowController.mode = mode;
 	
+    PluginLog(@"scriptText: '%@'", scriptText);
+    
 	[scriptWindowController showWindow:nil];
 	self.scriptWindowController = scriptWindowController;
 }
@@ -509,15 +647,20 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		openWithScriptsArray = [[NSMutableArray alloc] initWithCapacity:1];
 	}
 	
-	if(scriptIdentifier.length) {
+	if(scriptIdentifier.length > 0 && script.length > 0) {
 		NSMutableDictionary *scriptDictionary = [[NSMutableDictionary alloc] init];
 		scriptDictionary[AJKShortcutIdentifier] = scriptIdentifier;
-		
+        scriptDictionary[AJKScriptName] = scriptName ? : @"Untitled Script";
+        scriptDictionary[AJKScript] = script;
+        PluginLogWithName(self.pluginName, @"script: %@", script);
+        
 		if(shortcut) {
 			scriptDictionary[AJKShortcutDictionary] = shortcut;
 		}
+        
 		
 		[openWithScriptsArray addObject:scriptDictionary];
+        PluginLog(@"scriptDictionary: %@", scriptDictionary);
 	}
 	
 	[[self userDefaults] setObject:openWithScriptsArray forKey:AJKOpenWithScripts];
@@ -527,6 +670,8 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 - (void)removeScriptWithIdentifier:(NSString *)scriptIdentifier
 {
+    PluginLog(@"removeScriptWithIdentifier: %@", scriptIdentifier);
+    
 	if(!scriptIdentifier) {
 		return;
 	}
@@ -536,11 +681,10 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		return ![applicationDictionary[AJKShortcutIdentifier] isEqualToString:scriptIdentifier];
 	}];
 	
-	if(indexesToKeep.count < openWithScriptsArray.count) {
-		NSArray *objectsToKeep = [openWithScriptsArray objectsAtIndexes:indexesToKeep];
-		[[self userDefaults] setObject:objectsToKeep forKey:AJKOpenWithScripts];
-		[[self userDefaults] synchronize];
-	}
+    NSArray *objectsToKeep = [openWithScriptsArray objectsAtIndexes:indexesToKeep];
+    PluginLog(@"removeScriptWithIdentifier: %@ - %@", scriptIdentifier, objectsToKeep);
+    [[self userDefaults] setObject:objectsToKeep forKey:AJKOpenWithScripts];
+    [[self userDefaults] synchronize];
 }
 
 
@@ -659,10 +803,10 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 	[addApplicationMenuItem setTarget:self];
 	[applicationMenu addItem:addApplicationMenuItem];
 	
-//	title = NSLocalizedString(@"Add Script…", @"Add Script shortcut menu item");
-//	NSMenuItem *addScriptMenuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(registerScriptWithApplicationShortcut:) keyEquivalent:@""];
-//	[addScriptMenuItem setTarget:self];
-//	[applicationMenu addItem:addScriptMenuItem];
+	title = NSLocalizedString(@"Add Script…", @"Add Script shortcut menu item");
+	NSMenuItem *addScriptMenuItem = [[NSMenuItem alloc] initWithTitle:title action:@selector(registerScriptWithApplicationShortcut:) keyEquivalent:@""];
+	[addScriptMenuItem setTarget:self];
+	[applicationMenu addItem:addScriptMenuItem];
 	
 	self.openInApplicationMenuItem.submenu = applicationMenu;
 }
@@ -725,7 +869,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 }
 
 
-- (NSRange)currentSelection
+- (NSTextView *)currentlySelectedTextView
 {
 	@try {
 		NSWindowController *currentWindowController = [[NSApp keyWindow] windowController];
@@ -735,7 +879,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 			
 			// Get current selection
 			if(editor && [[NSApp keyWindow] firstResponder] == [editor textView]) {
-				return [[editor textView] selectedRange];
+				return [editor textView];
 			}
 		}
 	}
@@ -744,7 +888,7 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 		PluginLogWithName(self.pluginName, @"Raised an exception while looking for the current documents selection: %@", exception);
 	}
 	
-	return NSMakeRange(NSNotFound, 0);
+	return nil;
 }
 
 
@@ -818,6 +962,12 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 }
 
 
+- (NSString *)temporaryScriptsDirectoryPath
+{
+    return [NSTemporaryDirectory() stringByAppendingPathComponent:@"OpenWithApplication"];
+}
+
+
 
 #pragma mark - A helper method to use in developing
 
@@ -838,3 +988,39 @@ NSString * const AJKShortcutDictionary = @"AJKShortcutDictionary";
 
 
 @end
+
+
+
+AJKCursorLocation AJKCursorLocationForSelectionInText(NSRange selectedRange, NSString *currentText) {
+    NSRange textRange = NSMakeRange(0, currentText.length);
+    
+    NSInteger selectionStart = selectedRange.location;
+    NSInteger selectionEnd = selectedRange.location + selectedRange.length;
+    
+    __block NSInteger startCursorLine = 0;
+    __block NSInteger startCursorPosition = 0;
+    __block NSInteger endCursorLine = 0;
+    __block NSInteger endCursorPosition = 0;
+    
+    [currentText enumerateSubstringsInRange:textRange options:NSStringEnumerationByLines usingBlock:^(NSString * _Nullable substring, NSRange substringRange, NSRange enclosingRange, BOOL * _Nonnull stop) {
+        if (enclosingRange.location <= selectionEnd) {
+            if (enclosingRange.location <= selectionStart) {
+                startCursorLine += 1;
+                startCursorPosition = MAX(selectionStart - substringRange.location + 1, 0);
+            }
+            
+            endCursorLine += 1;
+            endCursorPosition = MAX(selectionEnd - substringRange.location + 1, 0);
+        } else {
+            *stop = TRUE;
+        }
+    }];
+    
+    __block AJKCursorLocation cursorLocation;
+    cursorLocation.startCursorLine = startCursorLine;
+    cursorLocation.startCursorPosition = startCursorPosition;
+    cursorLocation.endCursorLine = endCursorLine;
+    cursorLocation.endCursorPosition = endCursorPosition;
+    return cursorLocation;
+}
+
